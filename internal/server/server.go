@@ -10,10 +10,16 @@ type Server struct {
 func NewServer() *Server {
 	mux := http.NewServeMux()
 
+	fileServer := http.FileServer(http.Dir("./web/"))
+	mux.Handle("/app/", http.StripPrefix("/app", fileServer))
+
+	registerHandlers(mux)
+
 	s := &http.Server{
 		Addr:    ":8080",
 		Handler: mux,
 	}
+
 	return &Server{
 		mux:    mux,
 		server: s,
