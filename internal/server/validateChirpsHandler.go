@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -16,61 +15,40 @@ func validateChirpsHandler(w http.ResponseWriter, r *http.Request) {
 		Body string `json:"body"`
 	}
 
-	type cleanedResponse struct {
+	type returnVals struct {
 		CleanedBody string `json:"cleaned_body"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
 	if err := decoder.Decode(&params); err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Failed to decode request body")
+		respondWithError(w, http.StatusInternalServerError, "Failed to decode request body", err)
 		return
 	}
 
-	if len(params.Body) > 140 {
-		respondWithError(w, http.StatusBadRequest, "Chirp is too long")
+	const maxChirpLength = 140
+	if len(params.Body) > maxChirpLength {
+		respondWithError(w, http.StatusBadRequest, "Chirp is too long", nil)
 		return
 	}
 
-	profaneWords := []string{"kerfuffle", "sharbert", "fornax"}
+	badWords := []string{"kerfuffle", "sharbert", "fornax"}
+	cleaned := getCleanedChirp(params.Body, badWords)
 
-	words := strings.Split(params.Body, " ")
+	respondWithJSON(w, http.StatusOK, returnVals{CleanedBody: cleaned})
+}
+
+func getCleanedChirp(body string, badWords []string) string {
+
+	words := strings.Split(body, " ")
 
 	for i, w := range words {
-		for _, bad := range profaneWords {
+		for _, bad := range badWords {
 			if strings.EqualFold(w, bad) {
 				words[i] = "****"
 				break
 			}
 		}
 	}
-
-	cleaned := strings.Join(words, " ")
-
-	respBody := cleanedResponse{
-		CleanedBody: cleaned,
-	}
-
-	respondWithJSON(w, http.StatusOK, respBody)
-}
-
-func respondWithError(w http.ResponseWriter, code int, msg string) {
-	type errorResponse struct {
-		Error string `json:"error"`
-	}
-
-	resp := errorResponse{Error: msg}
-	respondWithJSON(w, code, resp)
-}
-
-func respondWithJSON(w http.ResponseWriter, code int, payload any) {
-	data, err := json.Marshal(payload)
-	if err != nil {
-		log.Printf("Error marshalling JSON: %s", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	_, _ = w.Write(data)
+	return strings.Join(words, " ")
 }
