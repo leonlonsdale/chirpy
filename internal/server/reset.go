@@ -6,7 +6,7 @@ import (
 )
 
 func registerResetHandler(mux *http.ServeMux, cfg *apiConfig) {
-	mux.HandleFunc("/reset", cfg.resetHandler)
+	mux.HandleFunc("POST /admin/reset", cfg.resetHandler)
 }
 
 func (cfg *apiConfig) resetHandler(w http.ResponseWriter, r *http.Request) {
