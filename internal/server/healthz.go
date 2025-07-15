@@ -6,7 +6,7 @@ import (
 )
 
 func registerHealthzHandler(mux *http.ServeMux) {
-	mux.HandleFunc("/healthz", healthzHandler)
+	mux.HandleFunc("GET /api/healthz", healthzHandler)
 }
 
 func healthzHandler(w http.ResponseWriter, r *http.Request) {
