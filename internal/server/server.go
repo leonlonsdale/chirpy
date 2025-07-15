@@ -1,31 +1,24 @@
 package server
 
-import "net/http"
+import (
+	"net/http"
+)
 
-type Server struct {
-	mux    *http.ServeMux
-	server *http.Server
-}
+func NewServer(port string) *http.Server {
 
-func NewServer() *Server {
+	cfg := &apiConfig{}
+
 	mux := http.NewServeMux()
 
 	fileServer := http.FileServer(http.Dir("./web/"))
-	mux.Handle("/app/", http.StripPrefix("/app", fileServer))
+	mux.Handle("/app/", http.StripPrefix("/app", cfg.middlewareMetricsInc(fileServer)))
 
-	registerHandlers(mux)
+	registerHandlers(mux, cfg)
 
 	s := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":" + port,
 		Handler: mux,
 	}
 
-	return &Server{
-		mux:    mux,
-		server: s,
-	}
-}
-
-func (s *Server) Start() error {
-	return s.server.ListenAndServe()
+	return s
 }
