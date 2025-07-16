@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/leonlonsdale/chirpy/internal/server/serverconfig"
+	"github.com/leonlonsdale/chirpy/internal/config"
 )
 
-func RegisterMetricsHandler(mux *http.ServeMux, cfg *serverconfig.ApiConfig) {
+func RegisterMetricsHandler(mux *http.ServeMux, cfg *config.ApiConfig) {
 	mux.HandleFunc("GET /admin/metrics", MetricsHandler(cfg))
 }
 
-func MetricsHandler(cfg *serverconfig.ApiConfig) http.HandlerFunc {
+func MetricsHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		resString := fmt.Sprintf(`
 		<html>
