@@ -1,4 +1,4 @@
-package server
+package serverutil
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func respondWithError(w http.ResponseWriter, code int, msg string, err error) {
+func RespondWithError(w http.ResponseWriter, code int, msg string, err error) {
 	type errorResponse struct {
 		Error string `json:"error"`
 	}
@@ -20,10 +20,10 @@ func respondWithError(w http.ResponseWriter, code int, msg string, err error) {
 	}
 
 	resp := errorResponse{Error: msg}
-	respondWithJSON(w, code, resp)
+	RespondWithJSON(w, code, resp)
 }
 
-func respondWithJSON(w http.ResponseWriter, code int, payload any) {
+func RespondWithJSON(w http.ResponseWriter, code int, payload any) {
 	data, err := json.Marshal(payload)
 	if err != nil {
 		log.Printf("Error marshalling JSON: %s", err)

@@ -1,12 +1,14 @@
-package server
+package apihandler
 
 import (
 	"encoding/json"
 	"net/http"
 	"strings"
+
+	"github.com/leonlonsdale/chirpy/internal/server/serverutil"
 )
 
-func registerValidateChirpsHandler(mux *http.ServeMux) {
+func RegisterValidateChirpsHandler(mux *http.ServeMux) {
 	mux.HandleFunc("/api/validate_chirp", validateChirpsHandler)
 }
 
@@ -22,20 +24,20 @@ func validateChirpsHandler(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
 	if err := decoder.Decode(&params); err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Failed to decode request body", err)
+		serverutil.RespondWithError(w, http.StatusInternalServerError, "Failed to decode request body", err)
 		return
 	}
 
 	const maxChirpLength = 140
 	if len(params.Body) > maxChirpLength {
-		respondWithError(w, http.StatusBadRequest, "Chirp is too long", nil)
+		serverutil.RespondWithError(w, http.StatusBadRequest, "Chirp is too long", nil)
 		return
 	}
 
 	badWords := []string{"kerfuffle", "sharbert", "fornax"}
 	cleaned := getCleanedChirp(params.Body, badWords)
 
-	respondWithJSON(w, http.StatusOK, returnVals{CleanedBody: cleaned})
+	serverutil.RespondWithJSON(w, http.StatusOK, returnVals{CleanedBody: cleaned})
 }
 
 func getCleanedChirp(body string, badWords []string) string {

@@ -1,15 +1,17 @@
-package server
+package webhandler
 
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/leonlonsdale/chirpy/internal/server/serverconfig"
 )
 
-func registerMetricsHandler(mux *http.ServeMux, cfg *ApiConfig) {
+func RegisterMetricsHandler(mux *http.ServeMux, cfg *serverconfig.ApiConfig) {
 	mux.HandleFunc("GET /admin/metrics", MetricsHandler(cfg))
 }
 
-func MetricsHandler(cfg *ApiConfig) http.HandlerFunc {
+func MetricsHandler(cfg *serverconfig.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		resString := fmt.Sprintf(`
 		<html>

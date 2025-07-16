@@ -9,6 +9,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/leonlonsdale/chirpy/internal/database"
 	"github.com/leonlonsdale/chirpy/internal/server"
+	"github.com/leonlonsdale/chirpy/internal/server/serverconfig"
+
 	_ "github.com/lib/pq"
 )
 
@@ -22,7 +24,7 @@ func main() {
 	}
 
 	const port = "8080"
-	cfg := &server.ApiConfig{
+	cfg := &serverconfig.ApiConfig{
 		FileserverHits: atomic.Int32{},
 		DBQueries:      *database.New(db),
 	}

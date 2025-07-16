@@ -1,4 +1,4 @@
-package server
+package serverconfig
 
 import (
 	"net/http"
@@ -12,7 +12,7 @@ type ApiConfig struct {
 	DBQueries      database.Queries
 }
 
-func (cfg *ApiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
+func (cfg *ApiConfig) MiddlewareMetricsInc(next http.Handler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			cfg.FileserverHits.Add(1)

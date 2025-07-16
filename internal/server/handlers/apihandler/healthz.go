@@ -1,11 +1,11 @@
-package server
+package apihandler
 
 import (
 	"fmt"
 	"net/http"
 )
 
-func registerHealthzHandler(mux *http.ServeMux) {
+func RegisterHealthzHandler(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/healthz", healthzHandler)
 }
 
