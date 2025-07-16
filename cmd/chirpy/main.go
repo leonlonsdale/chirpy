@@ -27,6 +27,7 @@ func main() {
 	cfg := &config.ApiConfig{
 		FileserverHits: atomic.Int32{},
 		DBQueries:      *database.New(db),
+		Platform:       os.Getenv("PLATFORM"),
 	}
 
 	s := server.NewServer(port, cfg)
