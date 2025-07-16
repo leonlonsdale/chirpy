@@ -3,8 +3,8 @@ package server
 import (
 	"net/http"
 
-	"github.com/leonlonsdale/chirpy/internal/server/handlers/apihandler"
-	"github.com/leonlonsdale/chirpy/internal/server/handlers/webhandler"
+	"github.com/leonlonsdale/chirpy/internal/handlers/apihandler"
+	"github.com/leonlonsdale/chirpy/internal/handlers/webhandler"
 	"github.com/leonlonsdale/chirpy/internal/server/serverconfig"
 )
 
