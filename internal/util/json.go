@@ -1,4 +1,4 @@
-package serverutil
+package util
 
 import (
 	"encoding/json"

@@ -3,10 +3,10 @@ package server
 import (
 	"net/http"
 
-	"github.com/leonlonsdale/chirpy/internal/server/serverconfig"
+	"github.com/leonlonsdale/chirpy/internal/config"
 )
 
-func NewServer(port string, cfg *serverconfig.ApiConfig) *http.Server {
+func NewServer(port string, cfg *config.ApiConfig) *http.Server {
 
 	mux := http.NewServeMux()
 
