@@ -4,9 +4,7 @@ import (
 	"net/http"
 )
 
-func NewServer(port string) *http.Server {
-
-	cfg := &apiConfig{}
+func NewServer(port string, cfg *ApiConfig) *http.Server {
 
 	mux := http.NewServeMux()
 
