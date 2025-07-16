@@ -6,9 +6,9 @@ import (
 	"os"
 	"sync/atomic"
 
-	"github.com/ionztorm/chirpy/internal/database"
-	"github.com/ionztorm/chirpy/internal/server"
 	"github.com/joho/godotenv"
+	"github.com/leonlonsdale/chirpy/internal/database"
+	"github.com/leonlonsdale/chirpy/internal/server"
 	_ "github.com/lib/pq"
 )
 
