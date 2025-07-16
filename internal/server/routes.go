@@ -13,6 +13,14 @@ func registerHandlers(mux *http.ServeMux, cfg *config.ApiConfig) {
 	webhandler.RegisterResetHandler(mux, cfg)
 	webhandler.RegisterFileServerHandler(mux, cfg)
 
+	// ==========[ API ]
 	apihandler.RegisterHealthzHandler(mux)
-	apihandler.RegisterValidateChirpsHandler(mux)
+
+	// user
+	apihandler.RegisterCreateUserHandler(mux, cfg)
+
+	// chirp
+	apihandler.RegisterPostChirp(mux, cfg)
+	apihandler.RegisterGetChirps(mux, cfg)
+	apihandler.RegisterGetChirpByID(mux, cfg)
 }
