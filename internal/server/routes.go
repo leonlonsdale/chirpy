@@ -9,8 +9,10 @@ import (
 )
 
 func registerHandlers(mux *http.ServeMux, cfg *serverconfig.ApiConfig) {
-	apihandler.RegisterHealthzHandler(mux)
 	webhandler.RegisterMetricsHandler(mux, cfg)
 	webhandler.RegisterResetHandler(mux, cfg)
+	webhandler.RegisterFileServerHandler(mux, cfg)
+
+	apihandler.RegisterHealthzHandler(mux)
 	apihandler.RegisterValidateChirpsHandler(mux)
 }
