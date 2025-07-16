@@ -5,11 +5,11 @@ import (
 	"net/http"
 )
 
-func registerMetricsHandler(mux *http.ServeMux, cfg *apiConfig) {
+func registerMetricsHandler(mux *http.ServeMux, cfg *ApiConfig) {
 	mux.HandleFunc("GET /admin/metrics", cfg.metricsHandler)
 }
 
-func (cfg *apiConfig) metricsHandler(w http.ResponseWriter, r *http.Request) {
+func (cfg *ApiConfig) metricsHandler(w http.ResponseWriter, r *http.Request) {
 	resString := fmt.Sprintf(`
 		<html>
 			<body>
@@ -17,7 +17,7 @@ func (cfg *apiConfig) metricsHandler(w http.ResponseWriter, r *http.Request) {
 				<p>Chirpy has been visited %d times!</p>
 			</body>
 		</html>`,
-		cfg.fileserverHits.Load())
+		cfg.FileserverHits.Load())
 
 	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(http.StatusOK)
