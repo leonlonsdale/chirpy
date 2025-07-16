@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"sync/atomic"
 
-	"github.com/ionztorm/chirpy/internal/database"
+	"github.com/leonlonsdale/chirpy/internal/database"
 )
 
 type ApiConfig struct {
