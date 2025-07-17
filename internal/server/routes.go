@@ -18,10 +18,15 @@ func registerHandlers(mux *http.ServeMux, cfg *config.ApiConfig) {
 
 	// user
 	apihandler.RegisterCreateUserHandler(mux, cfg)
-	apihandler.RegisterUserLoginHandler(mux, cfg)
+	apihandler.RegisterUpdateUserHandler(mux, cfg)
 
 	// chirp
-	apihandler.RegisterPostChirp(mux, cfg)
-	apihandler.RegisterGetChirps(mux, cfg)
-	apihandler.RegisterGetChirpByID(mux, cfg)
+	apihandler.RegisterCreateChirpHandler(mux, cfg)
+	apihandler.RegisterGetAllChirpsHandler(mux, cfg)
+	apihandler.RegisterGetChirpByIDHandler(mux, cfg)
+
+	// auth
+	apihandler.RegisterLoginHandler(mux, cfg)
+	apihandler.RegisterRefreshHandler(mux, cfg)
+	apihandler.RegisterRevokeHandler(mux, cfg)
 }
