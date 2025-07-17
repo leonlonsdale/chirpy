@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/leonlonsdale/chirpy/internal/config"
+	"github.com/leonlonsdale/chirpy/internal/handlers"
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
@@ -24,9 +25,9 @@ func getAllChirpsHandler(cfg *config.ApiConfig) http.HandlerFunc {
 			util.RespondWithError(w, http.StatusInternalServerError, "could not retrieve chirps", err)
 		}
 
-		chirps := make([]Chirp, 0, len(chirpsData))
+		chirps := make([]handlers.Chirp, 0, len(chirpsData))
 		for _, c := range chirpsData {
-			chirps = append(chirps, Chirp{
+			chirps = append(chirps, handlers.Chirp{
 				ID:        c.ID,
 				CreatedAt: c.CreatedAt,
 				UpdatedAt: c.UpdatedAt,
@@ -44,7 +45,7 @@ func getChirpByIDHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		type response struct {
-			Chirp
+			handlers.Chirp
 		}
 
 		chirpID, err := uuid.Parse(r.PathValue("chirpID"))
@@ -64,7 +65,7 @@ func getChirpByIDHandler(cfg *config.ApiConfig) http.HandlerFunc {
 		}
 
 		foundChirp := response{
-			Chirp: Chirp{
+			Chirp: handlers.Chirp{
 				ID:        chirpData.ID,
 				CreatedAt: chirpData.CreatedAt,
 				UpdatedAt: chirpData.UpdatedAt,

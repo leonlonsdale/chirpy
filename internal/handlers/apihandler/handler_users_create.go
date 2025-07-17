@@ -3,22 +3,13 @@ package apihandler
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
-	"github.com/google/uuid"
 	"github.com/leonlonsdale/chirpy/internal/auth"
 	"github.com/leonlonsdale/chirpy/internal/config"
 	"github.com/leonlonsdale/chirpy/internal/database"
+	"github.com/leonlonsdale/chirpy/internal/handlers"
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
-
-type User struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Email     string    `json:"email"`
-	Password  string    `json:"-"`
-}
 
 func RegisterCreateUserHandler(mux *http.ServeMux, cfg *config.ApiConfig) {
 	mux.HandleFunc("POST /api/users", createUserHandler(cfg))
@@ -33,7 +24,7 @@ func createUserHandler(cfg *config.ApiConfig) http.HandlerFunc {
 		}
 
 		type response struct {
-			User
+			handlers.User
 		}
 
 		decoder := json.NewDecoder(r.Body)
@@ -63,7 +54,7 @@ func createUserHandler(cfg *config.ApiConfig) http.HandlerFunc {
 		}
 
 		newUser := response{
-			User: User{
+			User: handlers.User{
 				ID:        user.ID,
 				CreatedAt: user.CreatedAt.Time,
 				UpdatedAt: user.UpdatedAt.Time,

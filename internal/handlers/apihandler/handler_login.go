@@ -8,6 +8,7 @@ import (
 	"github.com/leonlonsdale/chirpy/internal/auth"
 	"github.com/leonlonsdale/chirpy/internal/config"
 	"github.com/leonlonsdale/chirpy/internal/database"
+	"github.com/leonlonsdale/chirpy/internal/handlers"
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
@@ -24,7 +25,7 @@ func loginHandler(cfg *config.ApiConfig) http.HandlerFunc {
 		}
 
 		type response struct {
-			User
+			handlers.User
 			Token        string `json:"token"`
 			RefreshToken string `json:"refresh_token"`
 		}
@@ -68,7 +69,7 @@ func loginHandler(cfg *config.ApiConfig) http.HandlerFunc {
 		}
 
 		responseBody := response{
-			User: User{
+			User: handlers.User{
 				ID:        user.ID,
 				CreatedAt: user.CreatedAt.Time,
 				UpdatedAt: user.UpdatedAt.Time,

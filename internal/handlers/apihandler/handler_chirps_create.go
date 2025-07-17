@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/leonlonsdale/chirpy/internal/auth"
 	"github.com/leonlonsdale/chirpy/internal/config"
 	"github.com/leonlonsdale/chirpy/internal/database"
+	"github.com/leonlonsdale/chirpy/internal/handlers"
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
@@ -17,19 +17,11 @@ func RegisterCreateChirpHandler(mux *http.ServeMux, cfg *config.ApiConfig) {
 	mux.Handle("POST /api/chirps", auth.AuthMiddleware(cfg, createChirpHandler(cfg)))
 }
 
-type Chirp struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Body      string    `json:"body"`
-	UserID    uuid.UUID `json:"user_id"`
-}
-
 func createChirpHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		type response struct {
-			Chirp
+			handlers.Chirp
 		}
 
 		userID, ok := auth.UserIDFromContext(r.Context())
@@ -78,7 +70,7 @@ func createChirpHandler(cfg *config.ApiConfig) http.HandlerFunc {
 		}
 
 		chirp := response{
-			Chirp: Chirp{
+			Chirp: handlers.Chirp{
 				ID:        data.ID,
 				CreatedAt: data.CreatedAt,
 				UpdatedAt: data.UpdatedAt,

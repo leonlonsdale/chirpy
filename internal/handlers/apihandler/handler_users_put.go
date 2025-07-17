@@ -7,6 +7,7 @@ import (
 	"github.com/leonlonsdale/chirpy/internal/auth"
 	"github.com/leonlonsdale/chirpy/internal/config"
 	"github.com/leonlonsdale/chirpy/internal/database"
+	"github.com/leonlonsdale/chirpy/internal/handlers"
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
@@ -18,7 +19,7 @@ func updateUserHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		type response struct {
-			User
+			handlers.User
 		}
 
 		tokenStr, err := auth.GetBearerToken(r.Header)
@@ -61,7 +62,7 @@ func updateUserHandler(cfg *config.ApiConfig) http.HandlerFunc {
 		}
 
 		resp := response{
-			User: User{
+			User: handlers.User{
 				ID:        user.ID,
 				Email:     user.Email,
 				CreatedAt: user.CreatedAt.Time,
