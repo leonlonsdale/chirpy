@@ -18,6 +18,7 @@ func registerHandlers(mux *http.ServeMux, cfg *config.ApiConfig) {
 
 	// user
 	apihandler.RegisterCreateUserHandler(mux, cfg)
+	apihandler.RegisterUserLoginHandler(mux, cfg)
 
 	// chirp
 	apihandler.RegisterPostChirp(mux, cfg)
