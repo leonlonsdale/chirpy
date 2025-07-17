@@ -24,9 +24,9 @@ func getAllChirpsHandler(cfg *config.ApiConfig) http.HandlerFunc {
 			util.RespondWithError(w, http.StatusInternalServerError, "could not retrieve chirps", err)
 		}
 
-		chirps := make([]chirp, 0, len(chirpsData))
+		chirps := make([]Chirp, 0, len(chirpsData))
 		for _, c := range chirpsData {
-			chirps = append(chirps, chirp{
+			chirps = append(chirps, Chirp{
 				ID:        c.ID,
 				CreatedAt: c.CreatedAt,
 				UpdatedAt: c.UpdatedAt,
@@ -42,6 +42,10 @@ func getAllChirpsHandler(cfg *config.ApiConfig) http.HandlerFunc {
 
 func getChirpByIDHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+
+		type response struct {
+			Chirp
+		}
 
 		chirpID, err := uuid.Parse(r.PathValue("chirpID"))
 		if err != nil {
@@ -59,12 +63,14 @@ func getChirpByIDHandler(cfg *config.ApiConfig) http.HandlerFunc {
 
 		}
 
-		foundChirp := chirp{
-			ID:        chirpData.ID,
-			CreatedAt: chirpData.CreatedAt,
-			UpdatedAt: chirpData.UpdatedAt,
-			Body:      chirpData.Body,
-			UserID:    chirpData.UserID,
+		foundChirp := response{
+			Chirp: Chirp{
+				ID:        chirpData.ID,
+				CreatedAt: chirpData.CreatedAt,
+				UpdatedAt: chirpData.UpdatedAt,
+				Body:      chirpData.Body,
+				UserID:    chirpData.UserID,
+			},
 		}
 
 		util.RespondWithJSON(w, http.StatusOK, foundChirp)

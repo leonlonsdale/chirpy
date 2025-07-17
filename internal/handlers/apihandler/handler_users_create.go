@@ -5,11 +5,20 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/leonlonsdale/chirpy/internal/auth"
 	"github.com/leonlonsdale/chirpy/internal/config"
 	"github.com/leonlonsdale/chirpy/internal/database"
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
+
+type User struct {
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Email     string    `json:"email"`
+	Password  string    `json:"-"`
+}
 
 func RegisterCreateUserHandler(mux *http.ServeMux, cfg *config.ApiConfig) {
 	mux.HandleFunc("POST /api/users", createUserHandler(cfg))
@@ -23,11 +32,8 @@ func createUserHandler(cfg *config.ApiConfig) http.HandlerFunc {
 			Password string `json:"password"`
 		}
 
-		type registerResponseData struct {
-			ID        string    `json:"id"`
-			CreatedAt time.Time `json:"created_at"`
-			UpdatedAt time.Time `json:"updated_at"`
-			Email     string    `json:"email"`
+		type response struct {
+			User
 		}
 
 		decoder := json.NewDecoder(r.Body)
@@ -36,13 +42,8 @@ func createUserHandler(cfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		if params.Email == "" {
-			util.RespondWithError(w, http.StatusBadRequest, "email is required", nil)
-			return
-		}
-
-		if params.Password == "" {
-			util.RespondWithError(w, http.StatusBadRequest, "password is required", nil)
+		if params.Email == "" || params.Password == "" {
+			util.RespondWithError(w, http.StatusBadRequest, "email and password are required", nil)
 			return
 		}
 
@@ -52,7 +53,7 @@ func createUserHandler(cfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		data, err := cfg.DBQueries.CreateUser(r.Context(), database.CreateUserParams{
+		user, err := cfg.DBQueries.CreateUser(r.Context(), database.CreateUserParams{
 			Email:          params.Email,
 			HashedPassword: hashedPassword,
 		})
@@ -61,11 +62,13 @@ func createUserHandler(cfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		newUser := registerResponseData{
-			ID:        data.ID.String(),
-			CreatedAt: data.CreatedAt.Time,
-			UpdatedAt: data.UpdatedAt.Time,
-			Email:     data.Email,
+		newUser := response{
+			User: User{
+				ID:        user.ID,
+				CreatedAt: user.CreatedAt.Time,
+				UpdatedAt: user.UpdatedAt.Time,
+				Email:     user.Email,
+			},
 		}
 
 		util.RespondWithJSON(w, http.StatusCreated, newUser)

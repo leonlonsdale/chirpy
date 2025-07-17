@@ -17,7 +17,7 @@ func RegisterCreateChirpHandler(mux *http.ServeMux, cfg *config.ApiConfig) {
 	mux.Handle("POST /api/chirps", auth.AuthMiddleware(cfg, createChirpHandler(cfg)))
 }
 
-type chirp struct {
+type Chirp struct {
 	ID        uuid.UUID `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -28,18 +28,20 @@ type chirp struct {
 func createChirpHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
+		type response struct {
+			Chirp
+		}
+
 		userID, ok := auth.UserIDFromContext(r.Context())
 		if !ok || userID == uuid.Nil {
 			util.RespondWithError(w, http.StatusUnauthorized, "user not authenticated", nil)
 			return
 		}
 
-		type parameters struct {
+		var params struct {
 			Body   string    `json:"body"`
 			UserID uuid.UUID `json:"user_id"`
 		}
-
-		params := parameters{}
 
 		decoder := json.NewDecoder(r.Body)
 		if err := decoder.Decode(&params); err != nil {
@@ -75,15 +77,17 @@ func createChirpHandler(cfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		newChirp := chirp{
-			ID:        data.ID,
-			CreatedAt: data.CreatedAt,
-			UpdatedAt: data.UpdatedAt,
-			Body:      data.Body,
-			UserID:    data.UserID,
+		chirp := response{
+			Chirp: Chirp{
+				ID:        data.ID,
+				CreatedAt: data.CreatedAt,
+				UpdatedAt: data.UpdatedAt,
+				Body:      data.Body,
+				UserID:    data.UserID,
+			},
 		}
 
-		util.RespondWithJSON(w, http.StatusCreated, newChirp)
+		util.RespondWithJSON(w, http.StatusCreated, chirp)
 
 	}
 }
