@@ -19,34 +19,29 @@ func RegisterRevokeHandler(mux *http.ServeMux, cfg *config.ApiConfig) {
 
 func refreshHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		token, err := auth.GetBearerToken(r.Header)
+		type response struct {
+			Token string `json:"token"`
+		}
+
+		refreshToken, err := auth.GetBearerToken(r.Header)
 		if err != nil {
 			util.RespondWithError(w, http.StatusInternalServerError, "unable to retrieve bearer token", err)
 			return
 		}
 
-		refreshRecord, err := cfg.DBQueries.GetRefreshToken(r.Context(), token)
+		user, err := cfg.DBQueries.GetUserFromRefreshToken(r.Context(), refreshToken)
 		if err != nil {
-			util.RespondWithError(w, http.StatusUnauthorized, "unable to retrieve bearer record", err)
+			util.RespondWithError(w, http.StatusUnauthorized, "couldn't find user for refresh token, the token may have expired", err)
 			return
 		}
 
-		if refreshRecord.ExpiresAt.Before(time.Now()) || refreshRecord.RevokedAt.Valid {
-			util.RespondWithError(w, http.StatusUnauthorized, "refresh token expired or revoked", nil)
-			return
-		}
-
-		newAccessToken, err := auth.MakeJWT(refreshRecord.UserID, cfg.Secret, time.Hour)
+		newAccessToken, err := auth.MakeJWT(user.ID, cfg.Secret, time.Hour)
 		if err != nil {
 			util.RespondWithError(w, http.StatusInternalServerError, "error creating new access token", err)
 			return
 		}
 
-		type refreshResponseData struct {
-			Token string `json:"token"`
-		}
-
-		refreshResp := refreshResponseData{
+		refreshResp := response{
 			Token: newAccessToken,
 		}
 
