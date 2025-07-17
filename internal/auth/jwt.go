@@ -14,20 +14,25 @@ var ErrorJWTInvalidToken = errors.New("invalid jwt token")
 var ErrorJWTInvalidClaimsType = errors.New("invalid claims type")
 var ErrorJWTTokenHasExpired = errors.New("jwt token has expired")
 
+type TokenType string
+
+const (
+	// TokenTypeAccess -
+	TokenTypeAccess TokenType = "chirpy-access"
+)
+
 func MakeJWT(userID uuid.UUID, tokenSecret string, expiresIn time.Duration) (string, error) {
 
 	now := time.Now().UTC()
-	// key := os.Getenv("JWT_SECRET_KEY")
 
 	claims := jwt.RegisteredClaims{
-		Issuer:    "chirpy",
+		Issuer:    string(TokenTypeAccess),
 		Subject:   userID.String(),
 		IssuedAt:  jwt.NewNumericDate(now),
 		ExpiresAt: jwt.NewNumericDate(now.Add(expiresIn)),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	// tokenString, err := token.SignedString([]byte(key))
 
 	tokenString, err := token.SignedString([]byte(tokenSecret))
 	if err != nil {
@@ -60,14 +65,28 @@ func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
 		return uuid.Nil, ErrorJWTInvalidClaimsType
 	}
 
+	userID, err := claims.GetSubject()
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	issuer, err := claims.GetIssuer()
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	if issuer != string(TokenTypeAccess) {
+		return uuid.Nil, errors.New("invalid issuer")
+	}
+
 	if claims.ExpiresAt != nil && claims.ExpiresAt.Before(time.Now().UTC()) {
 		return uuid.Nil, ErrorJWTTokenHasExpired
 	}
 
-	userId, err := uuid.Parse(claims.Subject)
+	uid, err := uuid.Parse(userID)
 	if err != nil {
 		return uuid.Nil, fmt.Errorf("user id not found in token validation: %w", err)
 	}
 
-	return userId, nil
+	return uid, nil
 }
