@@ -73,22 +73,3 @@ func revokeHandler(cfg *config.ApiConfig) http.HandlerFunc {
 
 	}
 }
-
-// func getRefreshToken(r *http.Request, cfg *config.ApiConfig) (database.RefreshToken, error) {
-// 	var ErrorInvalidToken = errors.New("token is invalid or expired")
-// 	token, err := auth.GetBearerToken(r.Header)
-// 	if err != nil {
-// 		return database.RefreshToken{}, err
-// 	}
-
-// 	refreshRecord, err := cfg.DBQueries.GetRefreshToken(r.Context(), token)
-// 	if err != nil {
-// 		return database.RefreshToken{}, err
-// 	}
-
-// 	if refreshRecord.Token == "" {
-// 		return database.RefreshToken{}, ErrorInvalidToken
-// 	}
-
-// 	return refreshRecord, nil
-// }
