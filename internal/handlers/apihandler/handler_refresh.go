@@ -1,0 +1,94 @@
+package apihandler
+
+import (
+	"net/http"
+	"time"
+
+	"github.com/leonlonsdale/chirpy/internal/auth"
+	"github.com/leonlonsdale/chirpy/internal/config"
+	"github.com/leonlonsdale/chirpy/internal/util"
+)
+
+func RegisterRefreshHandler(mux *http.ServeMux, cfg *config.ApiConfig) {
+	mux.HandleFunc("POST /api/refresh", refreshHandler(cfg))
+}
+
+func RegisterRevokeHandler(mux *http.ServeMux, cfg *config.ApiConfig) {
+	mux.HandleFunc("POST /api/revoke", revokeHandler(cfg))
+}
+
+func refreshHandler(cfg *config.ApiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		token, err := auth.GetBearerToken(r.Header)
+		if err != nil {
+			util.RespondWithError(w, http.StatusInternalServerError, "unable to retrieve bearer token", err)
+			return
+		}
+
+		refreshRecord, err := cfg.DBQueries.GetRefreshToken(r.Context(), token)
+		if err != nil {
+			util.RespondWithError(w, http.StatusUnauthorized, "unable to retrieve bearer record", err)
+			return
+		}
+
+		if refreshRecord.ExpiresAt.Before(time.Now()) || refreshRecord.RevokedAt.Valid {
+			util.RespondWithError(w, http.StatusUnauthorized, "refresh token expired or revoked", nil)
+			return
+		}
+
+		newAccessToken, err := auth.MakeJWT(refreshRecord.UserID, cfg.Secret, time.Hour)
+		if err != nil {
+			util.RespondWithError(w, http.StatusInternalServerError, "error creating new access token", err)
+			return
+		}
+
+		type refreshResponseData struct {
+			Token string `json:"token"`
+		}
+
+		refreshResp := refreshResponseData{
+			Token: newAccessToken,
+		}
+
+		util.RespondWithJSON(w, http.StatusOK, refreshResp)
+
+	}
+}
+
+func revokeHandler(cfg *config.ApiConfig) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		token, err := auth.GetBearerToken(r.Header)
+		if err != nil {
+			util.RespondWithError(w, http.StatusInternalServerError, "unable to retrieve bearer token", err)
+			return
+		}
+
+		if err := cfg.DBQueries.RevokeRefreshToken(r.Context(), token); err != nil {
+			util.RespondWithError(w, http.StatusInternalServerError, "there was a problem updating the refresh token record", err)
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+
+	}
+}
+
+// func getRefreshToken(r *http.Request, cfg *config.ApiConfig) (database.RefreshToken, error) {
+// 	var ErrorInvalidToken = errors.New("token is invalid or expired")
+// 	token, err := auth.GetBearerToken(r.Header)
+// 	if err != nil {
+// 		return database.RefreshToken{}, err
+// 	}
+
+// 	refreshRecord, err := cfg.DBQueries.GetRefreshToken(r.Context(), token)
+// 	if err != nil {
+// 		return database.RefreshToken{}, err
+// 	}
+
+// 	if refreshRecord.Token == "" {
+// 		return database.RefreshToken{}, ErrorInvalidToken
+// 	}
+
+// 	return refreshRecord, nil
+// }
