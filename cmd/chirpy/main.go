@@ -32,9 +32,10 @@ func main() {
 	}
 
 	s := server.NewServer(port, cfg)
+	server.RegisterHandlers(s.Mux, cfg)
 	fmt.Println("Starting server on 8080")
 
-	if err := s.ListenAndServe(); err != nil {
+	if err := s.Server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 }
