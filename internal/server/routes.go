@@ -3,30 +3,31 @@ package server
 import (
 	"net/http"
 
+	"github.com/leonlonsdale/chirpy/internal/auth"
 	"github.com/leonlonsdale/chirpy/internal/config"
 	"github.com/leonlonsdale/chirpy/internal/handlers/apihandler"
 	"github.com/leonlonsdale/chirpy/internal/handlers/webhandler"
 )
 
-func registerHandlers(mux *http.ServeMux, cfg *config.ApiConfig) {
-	webhandler.RegisterMetricsHandler(mux, cfg)
-	webhandler.RegisterResetHandler(mux, cfg)
-	webhandler.RegisterFileServerHandler(mux, cfg)
+func RegisterHandlers(mux *http.ServeMux, cfg *config.ApiConfig) {
+	mux.HandleFunc("GET /admin/metrics", webhandler.MetricsHandler(cfg))
+	mux.HandleFunc("POST /admin/reset", webhandler.ResetHandler(cfg))
+	mux.Handle("/app/", cfg.MiddlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir("./web/")))))
 
 	// ==========[ API ]
-	apihandler.RegisterHealthzHandler(mux)
+	mux.HandleFunc("GET /api/healthz", apihandler.HealthzHandler)
 
 	// user
-	apihandler.RegisterCreateUserHandler(mux, cfg)
-	apihandler.RegisterUpdateUserHandler(mux, cfg)
+	mux.HandleFunc("POST /api/users", apihandler.CreateUserHandler(cfg))
+	mux.HandleFunc("PUT /api/users", apihandler.UpdateUserHandler(cfg))
 
 	// chirp
-	apihandler.RegisterCreateChirpHandler(mux, cfg)
-	apihandler.RegisterGetAllChirpsHandler(mux, cfg)
-	apihandler.RegisterGetChirpByIDHandler(mux, cfg)
+	mux.Handle("POST /api/chirps", auth.MiddlewareCheckJWT(cfg.Secret, apihandler.CreateChirpHandler(cfg)))
+	mux.HandleFunc("GET /api/chirps", apihandler.GetAllChirpsHandler(cfg))
+	mux.HandleFunc("GET /api/chirps/{chirpID}", apihandler.GetChirpByIDHandler(cfg))
 
 	// auth
-	apihandler.RegisterLoginHandler(mux, cfg)
-	apihandler.RegisterRefreshHandler(mux, cfg)
-	apihandler.RegisterRevokeHandler(mux, cfg)
+	mux.HandleFunc("POST /api/login", apihandler.LoginHandler(cfg))
+	mux.HandleFunc("POST /api/refresh", apihandler.RefreshHandler(cfg))
+	mux.HandleFunc("POST /api/revoke", apihandler.RevokeHandler(cfg))
 }
