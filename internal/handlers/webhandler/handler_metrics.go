@@ -7,10 +7,6 @@ import (
 	"github.com/leonlonsdale/chirpy/internal/config"
 )
 
-func RegisterMetricsHandler(mux *http.ServeMux, cfg *config.ApiConfig) {
-	mux.HandleFunc("GET /admin/metrics", MetricsHandler(cfg))
-}
-
 func MetricsHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		resString := fmt.Sprintf(`

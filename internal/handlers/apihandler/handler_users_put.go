@@ -11,11 +11,7 @@ import (
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
-func RegisterUpdateUserHandler(mux *http.ServeMux, cfg *config.ApiConfig) {
-	mux.HandleFunc("PUT /api/users", updateUserHandler(cfg))
-}
-
-func updateUserHandler(cfg *config.ApiConfig) http.HandlerFunc {
+func UpdateUserHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		type response struct {

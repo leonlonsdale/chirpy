@@ -12,11 +12,7 @@ import (
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
-func RegisterLoginHandler(mux *http.ServeMux, cfg *config.ApiConfig) {
-	mux.HandleFunc("POST /api/login", loginHandler(cfg))
-}
-
-func loginHandler(cfg *config.ApiConfig) http.HandlerFunc {
+func LoginHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		var params struct {

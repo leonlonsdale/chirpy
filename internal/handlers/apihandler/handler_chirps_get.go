@@ -10,15 +10,7 @@ import (
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
-func RegisterGetAllChirpsHandler(mux *http.ServeMux, cfg *config.ApiConfig) {
-	mux.HandleFunc("GET /api/chirps", getAllChirpsHandler(cfg))
-}
-
-func RegisterGetChirpByIDHandler(mux *http.ServeMux, cfg *config.ApiConfig) {
-	mux.HandleFunc("GET /api/chirps/{chirpID}", getChirpByIDHandler(cfg))
-}
-
-func getAllChirpsHandler(cfg *config.ApiConfig) http.HandlerFunc {
+func GetAllChirpsHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		chirpsData, err := cfg.DBQueries.GetAllChirps(r.Context())
 		if err != nil {
@@ -41,7 +33,7 @@ func getAllChirpsHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func getChirpByIDHandler(cfg *config.ApiConfig) http.HandlerFunc {
+func GetChirpByIDHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		type response struct {

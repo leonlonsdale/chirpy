@@ -9,15 +9,7 @@ import (
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
-func RegisterRefreshHandler(mux *http.ServeMux, cfg *config.ApiConfig) {
-	mux.HandleFunc("POST /api/refresh", refreshHandler(cfg))
-}
-
-func RegisterRevokeHandler(mux *http.ServeMux, cfg *config.ApiConfig) {
-	mux.HandleFunc("POST /api/revoke", revokeHandler(cfg))
-}
-
-func refreshHandler(cfg *config.ApiConfig) http.HandlerFunc {
+func RefreshHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		type response struct {
 			Token string `json:"token"`
@@ -50,7 +42,7 @@ func refreshHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func revokeHandler(cfg *config.ApiConfig) http.HandlerFunc {
+func RevokeHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		token, err := auth.GetBearerToken(r.Header)

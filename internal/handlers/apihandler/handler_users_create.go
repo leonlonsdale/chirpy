@@ -11,11 +11,7 @@ import (
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
-func RegisterCreateUserHandler(mux *http.ServeMux, cfg *config.ApiConfig) {
-	mux.HandleFunc("POST /api/users", createUserHandler(cfg))
-}
-
-func createUserHandler(cfg *config.ApiConfig) http.HandlerFunc {
+func CreateUserHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		var params struct {

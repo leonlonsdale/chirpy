@@ -9,10 +9,6 @@ import (
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
-func RegisterResetHandler(mux *http.ServeMux, cfg *config.ApiConfig) {
-	mux.HandleFunc("POST /admin/reset", ResetHandler(cfg))
-}
-
 func ResetHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if cfg.Platform != "dev" {

@@ -13,11 +13,7 @@ import (
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
-func RegisterCreateChirpHandler(mux *http.ServeMux, cfg *config.ApiConfig) {
-	mux.Handle("POST /api/chirps", auth.AuthMiddleware(cfg, createChirpHandler(cfg)))
-}
-
-func createChirpHandler(cfg *config.ApiConfig) http.HandlerFunc {
+func CreateChirpHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		type response struct {
