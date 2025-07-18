@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/leonlonsdale/chirpy/internal/config"
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
@@ -13,7 +12,7 @@ type contextKey string
 
 const UserIDKey contextKey = "userID"
 
-func AuthMiddleware(cfg *config.ApiConfig, next http.Handler) http.Handler {
+func MiddlewareCheckJWT(secret string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tokenString, err := GetBearerToken(r.Header)
 		if err != nil {
@@ -21,7 +20,7 @@ func AuthMiddleware(cfg *config.ApiConfig, next http.Handler) http.Handler {
 			return
 		}
 
-		userID, err := ValidateJWT(tokenString, cfg.Secret)
+		userID, err := ValidateJWT(tokenString, secret)
 		if err != nil {
 			util.RespondWithError(w, http.StatusUnauthorized, "invalid token", nil)
 
