@@ -99,6 +99,22 @@ WHERE
     id = $1
 `
 
+// -- name: GetChirps :many
+// SELECT
+//
+//	*
+//
+// FROM
+//
+//	chirps
+//
+// WHERE ($1::uuid IS NULL
+//
+//	OR user_id = $1)
+//
+// ORDER BY
+//
+//	created_at ASC;
 func (q *Queries) GetChirpByID(ctx context.Context, id uuid.UUID) (Chirp, error) {
 	row := q.db.QueryRowContext(ctx, getChirpByID, id)
 	var i Chirp
