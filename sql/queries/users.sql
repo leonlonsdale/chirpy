@@ -28,5 +28,14 @@ RETURNING
     id,
     email,
     created_at,
-    updated_at;
+    updated_at,
+    is_chirpy_red;
+
+-- name: UpgradeToChirpyRed :execrows
+UPDATE
+    users
+SET
+    is_chirpy_red = TRUE
+WHERE
+    id = $1;
 
