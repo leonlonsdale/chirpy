@@ -29,6 +29,7 @@ func main() {
 		DBQueries:      *database.New(db),
 		Platform:       os.Getenv("PLATFORM"),
 		Secret:         os.Getenv("JWT_SECRET_KEY"),
+		PolkaKey:       os.Getenv("POLKA_KEY"),
 	}
 
 	s := server.NewServer(port, cfg)
