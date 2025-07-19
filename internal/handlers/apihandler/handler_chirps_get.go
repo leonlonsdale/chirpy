@@ -6,12 +6,12 @@ import (
 	"sort"
 
 	"github.com/google/uuid"
-	"github.com/leonlonsdale/chirpy/internal/config"
+	"github.com/leonlonsdale/chirpy/internal/database"
 	"github.com/leonlonsdale/chirpy/internal/handlers"
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
-func GetAllChirpsHandler(cfg *config.ApiConfig) http.HandlerFunc {
+func GetAllChirpsHandler(db database.Queries) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authorIDStr := r.URL.Query().Get("author_id")
 		var authorID uuid.UUID
@@ -32,7 +32,7 @@ func GetAllChirpsHandler(cfg *config.ApiConfig) http.HandlerFunc {
 			sortOrder = "asc"
 		}
 
-		chirpsData, err := cfg.DBQueries.GetAllChirps(r.Context())
+		chirpsData, err := db.GetAllChirps(r.Context())
 		if err != nil {
 			util.RespondWithError(w, http.StatusInternalServerError, "could not retrieve chirps", err)
 			return
@@ -63,7 +63,7 @@ func GetAllChirpsHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func GetChirpByIDHandler(cfg *config.ApiConfig) http.HandlerFunc {
+func GetChirpByIDHandler(db database.Queries) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		type response struct {
@@ -74,7 +74,7 @@ func GetChirpByIDHandler(cfg *config.ApiConfig) http.HandlerFunc {
 		if err != nil {
 			util.RespondWithError(w, http.StatusBadRequest, "invalid chirp id format", err)
 		}
-		chirpData, err := cfg.DBQueries.GetChirpByID(r.Context(), chirpID)
+		chirpData, err := db.GetChirpByID(r.Context(), chirpID)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				util.RespondWithError(w, http.StatusNotFound, "chirp not found", nil)

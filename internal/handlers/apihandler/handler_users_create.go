@@ -5,13 +5,12 @@ import (
 	"net/http"
 
 	"github.com/leonlonsdale/chirpy/internal/auth"
-	"github.com/leonlonsdale/chirpy/internal/config"
 	"github.com/leonlonsdale/chirpy/internal/database"
 	"github.com/leonlonsdale/chirpy/internal/handlers"
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
-func CreateUserHandler(cfg *config.ApiConfig) http.HandlerFunc {
+func CreateUserHandler(db database.Queries) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		var params struct {
@@ -40,7 +39,7 @@ func CreateUserHandler(cfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		user, err := cfg.DBQueries.CreateUser(r.Context(), database.CreateUserParams{
+		user, err := db.CreateUser(r.Context(), database.CreateUserParams{
 			Email:          params.Email,
 			HashedPassword: hashedPassword,
 		})

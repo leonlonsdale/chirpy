@@ -7,13 +7,12 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/leonlonsdale/chirpy/internal/auth"
-	"github.com/leonlonsdale/chirpy/internal/config"
 	"github.com/leonlonsdale/chirpy/internal/database"
 	"github.com/leonlonsdale/chirpy/internal/handlers"
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
-func CreateChirpHandler(cfg *config.ApiConfig) http.HandlerFunc {
+func CreateChirpHandler(db database.Queries) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		type response struct {
@@ -56,7 +55,7 @@ func CreateChirpHandler(cfg *config.ApiConfig) http.HandlerFunc {
 		badWords := []string{"kerfuffle", "sharbert", "fornax"}
 		cleaned := getCleanedChirp(params.Body, badWords)
 
-		data, err := cfg.DBQueries.CreateChirp(r.Context(), database.CreateChirpParams{
+		data, err := db.CreateChirp(r.Context(), database.CreateChirpParams{
 			Body:   cleaned,
 			UserID: userID,
 		})

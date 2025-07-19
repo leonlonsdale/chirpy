@@ -5,13 +5,12 @@ import (
 	"net/http"
 
 	"github.com/leonlonsdale/chirpy/internal/auth"
-	"github.com/leonlonsdale/chirpy/internal/config"
 	"github.com/leonlonsdale/chirpy/internal/database"
 	"github.com/leonlonsdale/chirpy/internal/handlers"
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
-func UpdateUserHandler(cfg *config.ApiConfig) http.HandlerFunc {
+func UpdateUserHandler(db database.Queries, secret string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		type response struct {
@@ -24,7 +23,7 @@ func UpdateUserHandler(cfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		userID, err := auth.ValidateJWT(tokenStr, cfg.Secret)
+		userID, err := auth.ValidateJWT(tokenStr, secret)
 		if err != nil {
 			util.RespondWithError(w, http.StatusUnauthorized, "invalid token", err)
 			return
@@ -47,7 +46,7 @@ func UpdateUserHandler(cfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		user, err := cfg.DBQueries.UpdateUser(r.Context(), database.UpdateUserParams{
+		user, err := db.UpdateUser(r.Context(), database.UpdateUserParams{
 			Email:          req.Email,
 			HashedPassword: hashedPassword,
 			ID:             userID,

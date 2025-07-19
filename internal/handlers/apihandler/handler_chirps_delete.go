@@ -5,12 +5,11 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/leonlonsdale/chirpy/internal/auth"
-	"github.com/leonlonsdale/chirpy/internal/config"
 	"github.com/leonlonsdale/chirpy/internal/database"
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
-func DeleteChirpByID(cfg *config.ApiConfig) http.HandlerFunc {
+func DeleteChirpByID(db database.Queries) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := auth.UserIDFromContext(r.Context())
 		if !ok {
@@ -24,7 +23,7 @@ func DeleteChirpByID(cfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		chirp, err := cfg.DBQueries.GetChirpByID(r.Context(), chirpID)
+		chirp, err := db.GetChirpByID(r.Context(), chirpID)
 		if err != nil {
 			util.RespondWithError(w, http.StatusNotFound, "could not find chirp to delete", err)
 			return
@@ -35,7 +34,7 @@ func DeleteChirpByID(cfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		if err := cfg.DBQueries.DeleteChirp(r.Context(), database.DeleteChirpParams{
+		if err := db.DeleteChirp(r.Context(), database.DeleteChirpParams{
 			ID:     chirpID,
 			UserID: userID,
 		}); err != nil {

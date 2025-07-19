@@ -6,12 +6,12 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/leonlonsdale/chirpy/internal/auth"
-	"github.com/leonlonsdale/chirpy/internal/config"
+	"github.com/leonlonsdale/chirpy/internal/database"
 )
 
 const validEvent = "user.upgraded"
 
-func UpgradeToChirpyRedHandler(cfg *config.ApiConfig) http.HandlerFunc {
+func UpgradeToChirpyRedHandler(db database.Queries, polkakey string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var params struct {
 			Event string `json:"event"`
@@ -21,7 +21,7 @@ func UpgradeToChirpyRedHandler(cfg *config.ApiConfig) http.HandlerFunc {
 		}
 
 		apiKey, err := auth.GetAPIKey(r.Header)
-		if err != nil || apiKey != cfg.PolkaKey {
+		if err != nil || apiKey != polkakey {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -44,7 +44,7 @@ func UpgradeToChirpyRedHandler(cfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		affectedUsers, err := cfg.DBQueries.UpgradeToChirpyRed(r.Context(), userID)
+		affectedUsers, err := db.UpgradeToChirpyRed(r.Context(), userID)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return

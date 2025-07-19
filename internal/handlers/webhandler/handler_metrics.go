@@ -3,11 +3,13 @@ package webhandler
 import (
 	"fmt"
 	"net/http"
+	"sync/atomic"
 
-	"github.com/leonlonsdale/chirpy/internal/config"
+	"github.com/leonlonsdale/chirpy/internal/database"
 )
 
-func MetricsHandler(cfg *config.ApiConfig) http.HandlerFunc {
+func MetricsHandler(db database.Queries, fs *atomic.Int32) http.HandlerFunc {
+
 	return func(w http.ResponseWriter, r *http.Request) {
 		resString := fmt.Sprintf(`
 		<html>
@@ -16,7 +18,7 @@ func MetricsHandler(cfg *config.ApiConfig) http.HandlerFunc {
 				<p>Chirpy has been visited %d times!</p>
 			</body>
 		</html>`,
-			cfg.FileserverHits.Load())
+			fs.Load())
 
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)

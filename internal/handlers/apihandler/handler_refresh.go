@@ -5,11 +5,11 @@ import (
 	"time"
 
 	"github.com/leonlonsdale/chirpy/internal/auth"
-	"github.com/leonlonsdale/chirpy/internal/config"
+	"github.com/leonlonsdale/chirpy/internal/database"
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
-func RefreshHandler(cfg *config.ApiConfig) http.HandlerFunc {
+func RefreshHandler(db database.Queries, secret string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		type response struct {
 			Token string `json:"token"`
@@ -21,13 +21,13 @@ func RefreshHandler(cfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		user, err := cfg.DBQueries.GetUserFromRefreshToken(r.Context(), refreshToken)
+		user, err := db.GetUserFromRefreshToken(r.Context(), refreshToken)
 		if err != nil {
 			util.RespondWithError(w, http.StatusUnauthorized, "couldn't find user for refresh token, the token may have expired", err)
 			return
 		}
 
-		newAccessToken, err := auth.MakeJWT(user.ID, cfg.Secret, time.Hour)
+		newAccessToken, err := auth.MakeJWT(user.ID, secret, time.Hour)
 		if err != nil {
 			util.RespondWithError(w, http.StatusInternalServerError, "error creating new access token", err)
 			return
@@ -42,7 +42,7 @@ func RefreshHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	}
 }
 
-func RevokeHandler(cfg *config.ApiConfig) http.HandlerFunc {
+func RevokeHandler(db database.Queries) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		token, err := auth.GetBearerToken(r.Header)
@@ -51,7 +51,7 @@ func RevokeHandler(cfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		if err := cfg.DBQueries.RevokeRefreshToken(r.Context(), token); err != nil {
+		if err := db.RevokeRefreshToken(r.Context(), token); err != nil {
 			util.RespondWithError(w, http.StatusInternalServerError, "there was a problem updating the refresh token record", err)
 			return
 		}

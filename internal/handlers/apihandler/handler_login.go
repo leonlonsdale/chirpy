@@ -6,13 +6,12 @@ import (
 	"time"
 
 	"github.com/leonlonsdale/chirpy/internal/auth"
-	"github.com/leonlonsdale/chirpy/internal/config"
 	"github.com/leonlonsdale/chirpy/internal/database"
 	"github.com/leonlonsdale/chirpy/internal/handlers"
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
-func LoginHandler(cfg *config.ApiConfig) http.HandlerFunc {
+func LoginHandler(db database.Queries, secret string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		var params struct {
@@ -32,7 +31,7 @@ func LoginHandler(cfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		user, err := cfg.DBQueries.GetUserByEmail(r.Context(), params.Email)
+		user, err := db.GetUserByEmail(r.Context(), params.Email)
 		if err != nil {
 			util.RespondWithError(w, http.StatusInternalServerError, "error looking up user", err)
 			return
@@ -43,7 +42,7 @@ func LoginHandler(cfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		accessToken, err := auth.MakeJWT(user.ID, cfg.Secret, time.Hour)
+		accessToken, err := auth.MakeJWT(user.ID, secret, time.Hour)
 		if err != nil {
 			util.RespondWithError(w, http.StatusInternalServerError, "error creating jwt token", err)
 			return
@@ -55,7 +54,7 @@ func LoginHandler(cfg *config.ApiConfig) http.HandlerFunc {
 			return
 		}
 
-		if err := cfg.DBQueries.CreateRefreshToken(r.Context(), database.CreateRefreshTokenParams{
+		if err := db.CreateRefreshToken(r.Context(), database.CreateRefreshTokenParams{
 			Token:     refreshToken,
 			UserID:    user.ID,
 			ExpiresAt: time.Now().Add(60 * 24 * time.Hour),
