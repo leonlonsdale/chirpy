@@ -59,10 +59,11 @@ func UpdateUserHandler(cfg *config.ApiConfig) http.HandlerFunc {
 
 		resp := response{
 			User: handlers.User{
-				ID:        user.ID,
-				Email:     user.Email,
-				CreatedAt: user.CreatedAt.Time,
-				UpdatedAt: user.UpdatedAt.Time,
+				ID:          user.ID,
+				Email:       user.Email,
+				CreatedAt:   user.CreatedAt.Time,
+				UpdatedAt:   user.UpdatedAt.Time,
+				IsChipryRed: user.IsChirpyRed,
 			},
 		}
 
