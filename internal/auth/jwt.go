@@ -17,7 +17,6 @@ var ErrorJWTTokenHasExpired = errors.New("jwt token has expired")
 type TokenType string
 
 const (
-	// TokenTypeAccess -
 	TokenTypeAccess TokenType = "chirpy-access"
 )
 
