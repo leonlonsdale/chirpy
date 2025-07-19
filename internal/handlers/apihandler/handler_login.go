@@ -66,10 +66,11 @@ func LoginHandler(cfg *config.ApiConfig) http.HandlerFunc {
 
 		responseBody := response{
 			User: handlers.User{
-				ID:        user.ID,
-				CreatedAt: user.CreatedAt.Time,
-				UpdatedAt: user.UpdatedAt.Time,
-				Email:     user.Email,
+				ID:          user.ID,
+				CreatedAt:   user.CreatedAt.Time,
+				UpdatedAt:   user.UpdatedAt.Time,
+				Email:       user.Email,
+				IsChipryRed: user.IsChirpyRed,
 			},
 			Token:        accessToken,
 			RefreshToken: refreshToken,
