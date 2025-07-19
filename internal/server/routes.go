@@ -31,4 +31,7 @@ func RegisterHandlers(mux *http.ServeMux, cfg *config.ApiConfig) {
 	mux.HandleFunc("POST /api/login", apihandler.LoginHandler(cfg))
 	mux.HandleFunc("POST /api/refresh", apihandler.RefreshHandler(cfg))
 	mux.HandleFunc("POST /api/revoke", apihandler.RevokeHandler(cfg))
+
+	// webhooks
+	mux.HandleFunc("POST /api/polka/webhooks", apihandler.UpgradeToChirpyRedHandler(cfg))
 }
