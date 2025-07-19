@@ -28,18 +28,14 @@ func MiddlewareCheckJWT(secret string, next http.Handler) http.Handler {
 		}
 
 		ctx := context.WithValue(r.Context(), UserIDKey, userID)
+
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
 func UserIDFromContext(ctx context.Context) (uuid.UUID, bool) {
-	userIDStr, ok := ctx.Value(UserIDKey).(string)
+	userID, ok := ctx.Value(UserIDKey).(uuid.UUID)
 	if !ok {
-		return uuid.Nil, false
-	}
-
-	userID, err := uuid.Parse(userIDStr)
-	if err != nil {
 		return uuid.Nil, false
 	}
 
