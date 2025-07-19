@@ -25,6 +25,7 @@ func RegisterHandlers(mux *http.ServeMux, cfg *config.ApiConfig) {
 	mux.Handle("POST /api/chirps", auth.MiddlewareCheckJWT(cfg.Secret, apihandler.CreateChirpHandler(cfg)))
 	mux.HandleFunc("GET /api/chirps", apihandler.GetAllChirpsHandler(cfg))
 	mux.HandleFunc("GET /api/chirps/{chirpID}", apihandler.GetChirpByIDHandler(cfg))
+	mux.Handle("DELETE /api/chirps/{chirpID}", auth.MiddlewareCheckJWT(cfg.Secret, apihandler.DeleteChirpByID(cfg)))
 
 	// auth
 	mux.HandleFunc("POST /api/login", apihandler.LoginHandler(cfg))
