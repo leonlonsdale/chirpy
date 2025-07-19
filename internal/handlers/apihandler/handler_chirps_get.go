@@ -3,6 +3,7 @@ package apihandler
 import (
 	"database/sql"
 	"net/http"
+	"sort"
 
 	"github.com/google/uuid"
 	"github.com/leonlonsdale/chirpy/internal/config"
@@ -12,14 +13,37 @@ import (
 
 func GetAllChirpsHandler(cfg *config.ApiConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		authorIDStr := r.URL.Query().Get("author_id")
+		var authorID uuid.UUID
+		var err error
+		filterByAuthor := false
+
+		if authorIDStr != "" {
+			authorID, err = uuid.Parse(authorIDStr)
+			if err != nil {
+				util.RespondWithError(w, http.StatusBadRequest, "invalid author_id", err)
+				return
+			}
+			filterByAuthor = true
+		}
+
+		sortOrder := r.URL.Query().Get("sort")
+		if sortOrder != "asc" && sortOrder != "desc" {
+			sortOrder = "asc"
+		}
+
 		chirpsData, err := cfg.DBQueries.GetAllChirps(r.Context())
 		if err != nil {
 			util.RespondWithError(w, http.StatusInternalServerError, "could not retrieve chirps", err)
+			return
 		}
 
-		chirps := make([]handlers.Chirp, 0, len(chirpsData))
+		filteredChirps := make([]handlers.Chirp, 0, len(chirpsData))
 		for _, c := range chirpsData {
-			chirps = append(chirps, handlers.Chirp{
+			if filterByAuthor && c.UserID != authorID {
+				continue
+			}
+			filteredChirps = append(filteredChirps, handlers.Chirp{
 				ID:        c.ID,
 				CreatedAt: c.CreatedAt,
 				UpdatedAt: c.UpdatedAt,
@@ -28,8 +52,14 @@ func GetAllChirpsHandler(cfg *config.ApiConfig) http.HandlerFunc {
 			})
 		}
 
-		util.RespondWithJSON(w, http.StatusOK, chirps)
+		sort.Slice(filteredChirps, func(i, j int) bool {
+			if sortOrder == "asc" {
+				return filteredChirps[i].CreatedAt.Before(filteredChirps[j].CreatedAt)
+			}
+			return filteredChirps[i].CreatedAt.After(filteredChirps[j].CreatedAt)
+		})
 
+		util.RespondWithJSON(w, http.StatusOK, filteredChirps)
 	}
 }
 
