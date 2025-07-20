@@ -21,7 +21,7 @@ func (us *UsersStore) Create(ctx context.Context, data types.NewUser) (types.Use
 	`
 	row := us.db.QueryRowContext(ctx, query, data.Email, data.HashedPassword)
 
-	var u User
+	var u types.User
 	err := row.Scan(
 		&u.ID,
 		&u.Email,
