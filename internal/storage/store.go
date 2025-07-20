@@ -5,15 +5,13 @@ import (
 	"database/sql"
 
 	"github.com/google/uuid"
-	"github.com/leonlonsdale/chirpy/internal/database"
-	"github.com/leonlonsdale/chirpy/internal/types"
 )
 
 type Chirps interface {
-	Create(context.Context, types.NewChirp) (database.Chirp, error)
-	Read(context.Context) error
-	Update(context.Context) error
-	Delete(context.Context) error
+	Create(context.Context, NewChirp) (Chirp, error)
+	GetAll(context.Context) ([]Chirp, error)
+	GetById(context.Context, uuid.UUID) (Chirp, error)
+	Delete(context.Context, DeleteChirp) error
 }
 
 type Users interface {
@@ -32,7 +30,7 @@ type Storage struct {
 
 func NewStorage(db *sql.DB) Storage {
 	return Storage{
-		// Chirps: &ChirpsStore{db},
-		Users: &UsersStore{db},
+		Chirps: &ChirpsStore{db},
+		Users:  &UsersStore{db},
 	}
 }
