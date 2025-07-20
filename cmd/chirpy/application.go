@@ -3,26 +3,18 @@ package main
 import (
 	"log"
 	"net/http"
-	"sync/atomic"
 	"time"
 
 	"github.com/leonlonsdale/chirpy/internal/auth"
-	"github.com/leonlonsdale/chirpy/internal/database"
+	"github.com/leonlonsdale/chirpy/internal/config"
 	"github.com/leonlonsdale/chirpy/internal/handlers/apihandler"
 	"github.com/leonlonsdale/chirpy/internal/handlers/webhandler"
+	"github.com/leonlonsdale/chirpy/internal/storage"
 )
 
-type config struct {
-	addr           string
-	FileserverHits *atomic.Int32
-	DBQueries      database.Queries
-	Platform       string
-	Secret         string
-	PolkaKey       string
-}
-
 type application struct {
-	config config
+	config config.Config
+	store  storage.Storage
 }
 
 func (app *application) mount() *http.ServeMux {
@@ -33,7 +25,7 @@ func (app *application) mount() *http.ServeMux {
 	mux.Handle("/app/", app.MiddlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir("./web/")))))
 
 	// ==========[ API ]
-	mux.HandleFunc("GET /api/healthz", apihandler.HealthzHandler)
+	mux.HandleFunc("GET /api/healthz", app.healthHandler)
 
 	// user
 	mux.Handle("POST /api/users", apihandler.CreateUserHandler(app.config.DBQueries))
@@ -59,14 +51,14 @@ func (app *application) mount() *http.ServeMux {
 func (app *application) run(mux *http.ServeMux) error {
 
 	srv := &http.Server{
-		Addr:         app.config.addr,
+		Addr:         app.config.Addr,
 		Handler:      mux,
 		ReadTimeout:  time.Second * 10,
 		WriteTimeout: time.Second * 30,
 		IdleTimeout:  time.Minute,
 	}
 
-	log.Printf("Server listening on %s", app.config.addr)
+	log.Printf("Server listening on %s", app.config.Addr)
 
 	return srv.ListenAndServe()
 }

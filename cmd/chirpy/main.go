@@ -6,7 +6,9 @@ import (
 	"sync/atomic"
 
 	"github.com/joho/godotenv"
+	"github.com/leonlonsdale/chirpy/internal/config"
 	"github.com/leonlonsdale/chirpy/internal/database"
+	"github.com/leonlonsdale/chirpy/internal/storage"
 
 	_ "github.com/lib/pq"
 )
@@ -20,8 +22,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	cfg := config{
-		addr:           ":8080",
+	store := storage.NewStorage(db)
+
+	cfg := config.Config{
+		Addr:           ":8080",
 		FileserverHits: &atomic.Int32{},
 		DBQueries:      *database.New(db),
 		Platform:       os.Getenv("PLATFORM"),
@@ -31,6 +35,7 @@ func main() {
 
 	app := &application{
 		config: cfg,
+		store:  store,
 	}
 
 	log.Fatal(app.run(app.mount()))
