@@ -7,14 +7,16 @@ import (
 
 	"github.com/leonlonsdale/chirpy/internal/auth"
 	"github.com/leonlonsdale/chirpy/internal/config"
+	"github.com/leonlonsdale/chirpy/internal/handlers"
 	"github.com/leonlonsdale/chirpy/internal/handlers/apihandler"
 	"github.com/leonlonsdale/chirpy/internal/handlers/webhandler"
 	"github.com/leonlonsdale/chirpy/internal/storage"
 )
 
 type application struct {
-	config config.Config
-	store  storage.Storage
+	config   config.Config
+	store    storage.Storage
+	handlers *handlers.Handlers
 }
 
 func (app *application) mount() *http.ServeMux {
@@ -32,10 +34,15 @@ func (app *application) mount() *http.ServeMux {
 	mux.Handle("PUT /api/users", apihandler.UpdateUserHandler(app.config.DBQueries, app.config.Secret))
 
 	// chirp
-	mux.Handle("POST /api/chirps", auth.MiddlewareCheckJWT(app.config.Secret, apihandler.CreateChirpHandler(app.config.DBQueries)))
-	mux.Handle("GET /api/chirps", apihandler.GetAllChirpsHandler(app.config.DBQueries))
-	mux.Handle("GET /api/chirps/{chirpID}", apihandler.GetChirpByIDHandler(app.config.DBQueries))
-	mux.Handle("DELETE /api/chirps/{chirpID}", auth.MiddlewareCheckJWT(app.config.Secret, apihandler.DeleteChirpByID(app.config.DBQueries)))
+	mux.Handle("POST /api/chirps", auth.MiddlewareCheckJWT(app.config.Secret, app.handlers.ChirpHandlers.CreateChirp()))
+	mux.Handle("GET /api/chirps", app.handlers.ChirpHandlers.GetAllChirps())
+	mux.Handle("GET /api/chirps/{chirpID}", app.handlers.ChirpHandlers.GetChirpById())
+	mux.Handle("DELETE /api/chirps/{chirpID}", auth.MiddlewareCheckJWT(app.config.Secret, app.handlers.ChirpHandlers.DeleteChirpById()))
+
+	// mux.Handle("POST /api/chirps", auth.MiddlewareCheckJWT(app.config.Secret, apihandler.CreateChirpHandler(app.config.DBQueries)))
+	// mux.Handle("GET /api/chirps", apihandler.GetAllChirpsHandler(app.config.DBQueries))
+	// mux.Handle("GET /api/chirps/{chirpID}", apihandler.GetChirpByIDHandler(app.config.DBQueries))
+	// mux.Handle("DELETE /api/chirps/{chirpID}", auth.MiddlewareCheckJWT(app.config.Secret, apihandler.DeleteChirpByID(app.config.DBQueries)))
 
 	// auth
 	mux.Handle("POST /api/login", apihandler.LoginHandler(app.config.DBQueries, app.config.Secret))

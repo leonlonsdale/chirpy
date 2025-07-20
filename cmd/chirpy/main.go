@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/leonlonsdale/chirpy/internal/config"
 	"github.com/leonlonsdale/chirpy/internal/database"
+	"github.com/leonlonsdale/chirpy/internal/handlers"
 	"github.com/leonlonsdale/chirpy/internal/storage"
 
 	_ "github.com/lib/pq"
@@ -33,9 +34,12 @@ func main() {
 		PolkaKey:       os.Getenv("POLKA_KEY"),
 	}
 
+	handlers := handlers.NewHandlers(&store, &cfg)
+
 	app := &application{
-		config: cfg,
-		store:  store,
+		config:   cfg,
+		store:    store,
+		handlers: handlers,
 	}
 
 	log.Fatal(app.run(app.mount()))
