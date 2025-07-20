@@ -7,7 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/leonlonsdale/chirpy/internal/database"
-	"github.com/leonlonsdale/chirpy/internal/handlers"
+	"github.com/leonlonsdale/chirpy/internal/types"
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
@@ -38,12 +38,12 @@ func GetAllChirpsHandler(db database.Queries) http.HandlerFunc {
 			return
 		}
 
-		filteredChirps := make([]handlers.Chirp, 0, len(chirpsData))
+		filteredChirps := make([]types.Chirp, 0, len(chirpsData))
 		for _, c := range chirpsData {
 			if filterByAuthor && c.UserID != authorID {
 				continue
 			}
-			filteredChirps = append(filteredChirps, handlers.Chirp{
+			filteredChirps = append(filteredChirps, types.Chirp{
 				ID:        c.ID,
 				CreatedAt: c.CreatedAt,
 				UpdatedAt: c.UpdatedAt,
@@ -67,7 +67,7 @@ func GetChirpByIDHandler(db database.Queries) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		type response struct {
-			handlers.Chirp
+			types.Chirp
 		}
 
 		chirpID, err := uuid.Parse(r.PathValue("chirpID"))
@@ -87,7 +87,7 @@ func GetChirpByIDHandler(db database.Queries) http.HandlerFunc {
 		}
 
 		foundChirp := response{
-			Chirp: handlers.Chirp{
+			Chirp: types.Chirp{
 				ID:        chirpData.ID,
 				CreatedAt: chirpData.CreatedAt,
 				UpdatedAt: chirpData.UpdatedAt,
@@ -97,6 +97,5 @@ func GetChirpByIDHandler(db database.Queries) http.HandlerFunc {
 		}
 
 		util.RespondWithJSON(w, http.StatusOK, foundChirp)
-
 	}
 }

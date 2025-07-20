@@ -7,7 +7,7 @@ import (
 
 	"github.com/leonlonsdale/chirpy/internal/auth"
 	"github.com/leonlonsdale/chirpy/internal/database"
-	"github.com/leonlonsdale/chirpy/internal/handlers"
+	"github.com/leonlonsdale/chirpy/internal/types"
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
@@ -20,7 +20,7 @@ func LoginHandler(db database.Queries, secret string) http.HandlerFunc {
 		}
 
 		type response struct {
-			handlers.User
+			types.User
 			Token        string `json:"token"`
 			RefreshToken string `json:"refresh_token"`
 		}
@@ -64,12 +64,12 @@ func LoginHandler(db database.Queries, secret string) http.HandlerFunc {
 		}
 
 		responseBody := response{
-			User: handlers.User{
+			User: types.User{
 				ID:          user.ID,
 				CreatedAt:   user.CreatedAt.Time,
 				UpdatedAt:   user.UpdatedAt.Time,
 				Email:       user.Email,
-				IsChipryRed: user.IsChirpyRed,
+				IsChirpyRed: user.IsChirpyRed,
 			},
 			Token:        accessToken,
 			RefreshToken: refreshToken,

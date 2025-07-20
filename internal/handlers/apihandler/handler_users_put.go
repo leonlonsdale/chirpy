@@ -6,7 +6,7 @@ import (
 
 	"github.com/leonlonsdale/chirpy/internal/auth"
 	"github.com/leonlonsdale/chirpy/internal/database"
-	"github.com/leonlonsdale/chirpy/internal/handlers"
+	"github.com/leonlonsdale/chirpy/internal/types"
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
@@ -14,7 +14,7 @@ func UpdateUserHandler(db database.Queries, secret string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		type response struct {
-			handlers.User
+			types.User
 		}
 
 		tokenStr, err := auth.GetBearerToken(r.Header)
@@ -57,12 +57,12 @@ func UpdateUserHandler(db database.Queries, secret string) http.HandlerFunc {
 		}
 
 		resp := response{
-			User: handlers.User{
+			User: types.User{
 				ID:          user.ID,
 				Email:       user.Email,
 				CreatedAt:   user.CreatedAt.Time,
 				UpdatedAt:   user.UpdatedAt.Time,
-				IsChipryRed: user.IsChirpyRed,
+				IsChirpyRed: user.IsChirpyRed,
 			},
 		}
 

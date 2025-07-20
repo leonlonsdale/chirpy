@@ -3,44 +3,16 @@ package storage
 import (
 	"context"
 	"database/sql"
-	"time"
 
 	"github.com/google/uuid"
+	"github.com/leonlonsdale/chirpy/internal/types"
 )
-
-type NewUser struct {
-	Email          string
-	HashedPassword string
-}
-
-type User struct {
-	ID             uuid.UUID
-	Email          string
-	HashedPassword string
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-	IsChirpyRed    bool
-}
-
-type UpdateUser struct {
-	Email          string
-	HashedPassword string
-	ID             uuid.UUID
-}
-
-type UpdatedUser struct {
-	ID          uuid.UUID
-	Email       string
-	CreatedAt   sql.NullTime
-	UpdatedAt   sql.NullTime
-	IsChirpyRed bool
-}
 
 type UsersStore struct {
 	db *sql.DB
 }
 
-func (us *UsersStore) Create(ctx context.Context, data NewUser) (User, error) {
+func (us *UsersStore) Create(ctx context.Context, data types.NewUser) (types.User, error) {
 	query := `
 		INSERT INTO users (id, created_at, updated_at, email, hashed_password)
     		VALUES (gen_random_uuid (), NOW(), NOW(), $1, $2)
@@ -62,7 +34,7 @@ func (us *UsersStore) Create(ctx context.Context, data NewUser) (User, error) {
 	return u, err
 }
 
-func (us *UsersStore) GetByEmail(ctx context.Context, email string) (User, error) {
+func (us *UsersStore) GetByEmail(ctx context.Context, email string) (types.User, error) {
 	query := `
 		SELECT
 		    id, created_at, updated_at, email, hashed_password, is_chirpy_red
@@ -73,7 +45,7 @@ func (us *UsersStore) GetByEmail(ctx context.Context, email string) (User, error
 	`
 
 	row := us.db.QueryRowContext(ctx, query, email)
-	var u User
+	var u types.User
 	err := row.Scan(
 		&u.ID,
 		&u.Email,
@@ -86,7 +58,7 @@ func (us *UsersStore) GetByEmail(ctx context.Context, email string) (User, error
 	return u, err
 }
 
-func (us *UsersStore) Update(ctx context.Context, data UpdateUser) (UpdatedUser, error) {
+func (us *UsersStore) Update(ctx context.Context, data types.UpdateUser) (types.UpdatedUser, error) {
 	query := `
 		UPDATE
 		    users
@@ -104,7 +76,7 @@ func (us *UsersStore) Update(ctx context.Context, data UpdateUser) (UpdatedUser,
 		    is_chirpy_red
 	`
 	row := us.db.QueryRowContext(ctx, query, data.Email, data.HashedPassword, data.ID)
-	var u UpdatedUser
+	var u types.UpdatedUser
 	err := row.Scan(
 		&u.ID,
 		&u.Email,

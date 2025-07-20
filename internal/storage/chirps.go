@@ -3,9 +3,9 @@ package storage
 import (
 	"context"
 	"database/sql"
-	"time"
 
 	"github.com/google/uuid"
+	"github.com/leonlonsdale/chirpy/internal/types"
 	"github.com/leonlonsdale/chirpy/pkg/utils"
 )
 
@@ -13,25 +13,7 @@ type ChirpsStore struct {
 	db *sql.DB
 }
 
-type Chirp struct {
-	ID        uuid.UUID
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Body      string
-	UserID    uuid.UUID
-}
-
-type NewChirp struct {
-	Body   string
-	UserID uuid.UUID
-}
-
-type DeleteChirp struct {
-	ID     uuid.UUID
-	UserID uuid.UUID
-}
-
-func (cs *ChirpsStore) Create(ctx context.Context, data NewChirp) (Chirp, error) {
+func (cs *ChirpsStore) Create(ctx context.Context, data types.NewChirp) (types.Chirp, error) {
 	query := `
 		INSERT INTO chirps (id, created_at, updated_at, body, user_id)
 		    VALUES (gen_random_uuid (), NOW(), NOW(), $1, $2)
@@ -40,7 +22,7 @@ func (cs *ChirpsStore) Create(ctx context.Context, data NewChirp) (Chirp, error)
 	`
 
 	row := cs.db.QueryRowContext(ctx, query, data.Body, data.UserID)
-	var c Chirp
+	var c types.Chirp
 	err := row.Scan(
 		&c.ID,
 		&c.CreatedAt,
@@ -52,7 +34,7 @@ func (cs *ChirpsStore) Create(ctx context.Context, data NewChirp) (Chirp, error)
 	return c, err
 }
 
-func (cs *ChirpsStore) Delete(ctx context.Context, data DeleteChirp) error {
+func (cs *ChirpsStore) Delete(ctx context.Context, data types.DeleteChirp) error {
 	query := `
 		DELETE FROM chirps
 		WHERE id = $1
@@ -63,7 +45,7 @@ func (cs *ChirpsStore) Delete(ctx context.Context, data DeleteChirp) error {
 	return err
 }
 
-func (cs *ChirpsStore) GetAll(ctx context.Context) ([]Chirp, error) {
+func (cs *ChirpsStore) GetAll(ctx context.Context) ([]types.Chirp, error) {
 	query := `
 		SELECT
 		    id, created_at, updated_at, body, user_id
@@ -80,9 +62,9 @@ func (cs *ChirpsStore) GetAll(ctx context.Context) ([]Chirp, error) {
 
 	defer utils.SafeClose(rows)
 
-	var items []Chirp
+	var items []types.Chirp
 	for rows.Next() {
-		var c Chirp
+		var c types.Chirp
 		if err := rows.Scan(
 			&c.ID,
 			&c.CreatedAt,
@@ -103,7 +85,7 @@ func (cs *ChirpsStore) GetAll(ctx context.Context) ([]Chirp, error) {
 	return items, nil
 }
 
-func (cs *ChirpsStore) GetById(ctx context.Context, id uuid.UUID) (Chirp, error) {
+func (cs *ChirpsStore) GetById(ctx context.Context, id uuid.UUID) (types.Chirp, error) {
 	query := `
 		SELECT
 		    id, created_at, updated_at, body, user_id
@@ -113,7 +95,7 @@ func (cs *ChirpsStore) GetById(ctx context.Context, id uuid.UUID) (Chirp, error)
 		    id = $1
 	`
 	row := cs.db.QueryRowContext(ctx, query, id)
-	var c Chirp
+	var c types.Chirp
 	err := row.Scan(
 		&c.ID,
 		&c.CreatedAt,

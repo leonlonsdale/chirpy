@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/leonlonsdale/chirpy/internal/auth"
 	"github.com/leonlonsdale/chirpy/internal/database"
-	"github.com/leonlonsdale/chirpy/internal/handlers"
+	"github.com/leonlonsdale/chirpy/internal/types"
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
@@ -16,7 +16,7 @@ func CreateChirpHandler(db database.Queries) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		type response struct {
-			handlers.Chirp
+			types.Chirp
 		}
 
 		userID, ok := auth.UserIDFromContext(r.Context())
@@ -65,7 +65,7 @@ func CreateChirpHandler(db database.Queries) http.HandlerFunc {
 		}
 
 		chirp := response{
-			Chirp: handlers.Chirp{
+			Chirp: types.Chirp{
 				ID:        data.ID,
 				CreatedAt: data.CreatedAt,
 				UpdatedAt: data.UpdatedAt,

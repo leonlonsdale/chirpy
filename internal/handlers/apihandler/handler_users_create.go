@@ -6,7 +6,7 @@ import (
 
 	"github.com/leonlonsdale/chirpy/internal/auth"
 	"github.com/leonlonsdale/chirpy/internal/database"
-	"github.com/leonlonsdale/chirpy/internal/handlers"
+	"github.com/leonlonsdale/chirpy/internal/types"
 	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
@@ -19,7 +19,7 @@ func CreateUserHandler(db database.Queries) http.HandlerFunc {
 		}
 
 		type response struct {
-			handlers.User
+			types.User
 		}
 
 		decoder := json.NewDecoder(r.Body)
@@ -49,12 +49,12 @@ func CreateUserHandler(db database.Queries) http.HandlerFunc {
 		}
 
 		newUser := response{
-			User: handlers.User{
+			User: types.User{
 				ID:          user.ID,
 				CreatedAt:   user.CreatedAt.Time,
 				UpdatedAt:   user.UpdatedAt.Time,
 				Email:       user.Email,
-				IsChipryRed: user.IsChirpyRed,
+				IsChirpyRed: user.IsChirpyRed,
 			},
 		}
 
