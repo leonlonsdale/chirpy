@@ -8,7 +8,7 @@ import (
 
 var ErrorNoBearerToken = errors.New("no bearer token in headers")
 
-func GetBearerToken(headers http.Header) (string, error) {
+func (a *Auth) GetBearerToken(headers http.Header) (string, error) {
 
 	authorisation := headers.Get("Authorization")
 	if authorisation == "" {

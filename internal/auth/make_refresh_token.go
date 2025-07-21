@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-func MakeRefreshToken() (string, error) {
+func (a *Auth) MakeRefreshToken() (string, error) {
 	key := make([]byte, 32)
 	n, err := rand.Read(key)
 	if err != nil {
