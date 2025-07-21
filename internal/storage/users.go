@@ -24,10 +24,10 @@ func (us *UsersStore) Create(ctx context.Context, data types.NewUser) (types.Use
 	var u types.User
 	err := row.Scan(
 		&u.ID,
-		&u.Email,
-		&u.HashedPassword,
 		&u.CreatedAt,
 		&u.UpdatedAt,
+		&u.Email,
+		&u.HashedPassword,
 		&u.IsChirpyRed,
 	)
 
@@ -48,10 +48,10 @@ func (us *UsersStore) GetByEmail(ctx context.Context, email string) (types.User,
 	var u types.User
 	err := row.Scan(
 		&u.ID,
-		&u.Email,
-		&u.HashedPassword,
 		&u.CreatedAt,
 		&u.UpdatedAt,
+		&u.Email,
+		&u.HashedPassword,
 		&u.IsChirpyRed,
 	)
 

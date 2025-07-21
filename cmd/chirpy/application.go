@@ -95,17 +95,16 @@ func (app *application) resetHandler() http.HandlerFunc {
 		if app.config.Platform != "dev" {
 			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			w.WriteHeader(http.StatusForbidden)
-			log.Println("User accessed reset")
 			return
 		}
+		log.Println("User accessed reset")
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		app.config.FileserverHits.Store(0)
-		// TODO: IMPLEMENT RESET USERS
 		if err := app.store.Users.Reset(r.Context()); err != nil {
 			util.RespondWithError(w, http.StatusInternalServerError, "there was a problem resetting users", err)
 		}
-		_, _ = fmt.Fprintf(w, "Hit counter reset!")
+		_, _ = fmt.Fprintf(w, "Hit and Users counter reset!")
 	}
 }
 

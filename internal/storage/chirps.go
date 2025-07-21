@@ -41,7 +41,7 @@ func (cs *ChirpsStore) Delete(ctx context.Context, data types.DeleteChirp) error
 		    AND user_id = $2
 	`
 
-	_, err := cs.db.ExecContext(ctx, query)
+	_, err := cs.db.ExecContext(ctx, query, data.ID, data.UserID)
 	return err
 }
 
