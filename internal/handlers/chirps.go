@@ -16,8 +16,8 @@ import (
 )
 
 type ChirpHandlers struct {
-	Store *storage.Storage
-	Cfg   *config.Config
+	store *storage.Storage
+	cfg   *config.Config
 }
 
 func (h *ChirpHandlers) CreateChirp() http.HandlerFunc {
@@ -62,7 +62,7 @@ func (h *ChirpHandlers) CreateChirp() http.HandlerFunc {
 		badWords := []string{"kerfuffle", "sharbert", "fornax"}
 		cleaned := getCleanedChirp(params.Body, badWords)
 
-		data, err := h.Store.Chirps.Create(r.Context(), types.NewChirp{
+		data, err := h.store.Chirps.Create(r.Context(), types.NewChirp{
 			Body:   cleaned,
 			UserID: userID,
 		})
@@ -100,7 +100,7 @@ func (h *ChirpHandlers) GetAllChirps() http.HandlerFunc {
 			sortOrder = "asc"
 		}
 
-		chirpsData, err := h.Store.Chirps.GetAll(ctx)
+		chirpsData, err := h.store.Chirps.GetAll(ctx)
 		if err != nil {
 			util.RespondWithError(w, http.StatusInternalServerError, "could not retrieve chirps", err)
 			return
@@ -130,7 +130,7 @@ func (h *ChirpHandlers) GetChirpById() http.HandlerFunc {
 			return
 		}
 
-		chirp, err := h.Store.Chirps.GetById(ctx, chirpID)
+		chirp, err := h.store.Chirps.GetById(ctx, chirpID)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				util.RespondWithError(w, http.StatusNotFound, "chirp not found", nil)
@@ -168,7 +168,7 @@ func (h *ChirpHandlers) DeleteChirpById() http.HandlerFunc {
 			return
 		}
 
-		chirp, err := h.Store.Chirps.GetById(r.Context(), chirpID)
+		chirp, err := h.store.Chirps.GetById(r.Context(), chirpID)
 		if err != nil {
 			util.RespondWithError(w, http.StatusNotFound, "could not find chirp to delete", err)
 			return
@@ -179,7 +179,7 @@ func (h *ChirpHandlers) DeleteChirpById() http.HandlerFunc {
 			return
 		}
 
-		if err := h.Store.Chirps.Delete(r.Context(), types.DeleteChirp{
+		if err := h.store.Chirps.Delete(r.Context(), types.DeleteChirp{
 			ID:     chirpID,
 			UserID: userID,
 		}); err != nil {

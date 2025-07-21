@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -8,9 +9,8 @@ import (
 	"github.com/leonlonsdale/chirpy/internal/auth"
 	"github.com/leonlonsdale/chirpy/internal/config"
 	"github.com/leonlonsdale/chirpy/internal/handlers"
-	"github.com/leonlonsdale/chirpy/internal/handlers/apihandler"
-	"github.com/leonlonsdale/chirpy/internal/handlers/webhandler"
 	"github.com/leonlonsdale/chirpy/internal/storage"
+	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
 type application struct {
@@ -22,35 +22,28 @@ type application struct {
 func (app *application) mount() *http.ServeMux {
 	mux := http.NewServeMux()
 
-	mux.Handle("GET /admin/metrics", webhandler.MetricsHandler(app.config.DBQueries, app.config.FileserverHits))
-	mux.Handle("POST /admin/reset", webhandler.ResetHandler(app.config.DBQueries, app.config.FileserverHits, app.config.Platform))
-	mux.Handle("/app/", app.MiddlewareMetricsInc(http.StripPrefix("/app", http.FileServer(http.Dir("./web/")))))
-
-	// ==========[ API ]
-	mux.HandleFunc("GET /api/healthz", app.healthHandler)
+	mux.Handle("/app/", app.MiddlewareMetricsInc(app.createFileServer()))
+	mux.Handle("GET /admin/metrics", app.MetricsHandler())
+	mux.Handle("POST /admin/reset", app.resetHandler())
+	mux.Handle("GET /api/healthz", app.healthHandler())
 
 	// user
-	mux.Handle("POST /api/users", apihandler.CreateUserHandler(app.config.DBQueries))
-	mux.Handle("PUT /api/users", apihandler.UpdateUserHandler(app.config.DBQueries, app.config.Secret))
+	mux.Handle("POST /api/users", app.handlers.CreateUser())
+	mux.Handle("PUT /api/users", app.handlers.UpdateUser())
 
 	// chirp
-	mux.Handle("POST /api/chirps", auth.MiddlewareCheckJWT(app.config.Secret, app.handlers.ChirpHandlers.CreateChirp()))
-	mux.Handle("GET /api/chirps", app.handlers.ChirpHandlers.GetAllChirps())
-	mux.Handle("GET /api/chirps/{chirpID}", app.handlers.ChirpHandlers.GetChirpById())
-	mux.Handle("DELETE /api/chirps/{chirpID}", auth.MiddlewareCheckJWT(app.config.Secret, app.handlers.ChirpHandlers.DeleteChirpById()))
-
-	// mux.Handle("POST /api/chirps", auth.MiddlewareCheckJWT(app.config.Secret, apihandler.CreateChirpHandler(app.config.DBQueries)))
-	// mux.Handle("GET /api/chirps", apihandler.GetAllChirpsHandler(app.config.DBQueries))
-	// mux.Handle("GET /api/chirps/{chirpID}", apihandler.GetChirpByIDHandler(app.config.DBQueries))
-	// mux.Handle("DELETE /api/chirps/{chirpID}", auth.MiddlewareCheckJWT(app.config.Secret, apihandler.DeleteChirpByID(app.config.DBQueries)))
+	mux.Handle("POST /api/chirps", auth.JWTProtect(app.config.Secret, app.handlers.CreateChirp()))
+	mux.Handle("GET /api/chirps", app.handlers.GetAllChirps())
+	mux.Handle("GET /api/chirps/{chirpID}", app.handlers.GetChirpById())
+	mux.Handle("DELETE /api/chirps/{chirpID}", auth.JWTProtect(app.config.Secret, app.handlers.DeleteChirpById()))
 
 	// auth
-	mux.Handle("POST /api/login", apihandler.LoginHandler(app.config.DBQueries, app.config.Secret))
-	mux.Handle("POST /api/refresh", apihandler.RefreshHandler(app.config.DBQueries, app.config.Secret))
-	mux.Handle("POST /api/revoke", apihandler.RevokeHandler(app.config.DBQueries))
+	mux.Handle("POST /api/login", app.handlers.Login())
+	mux.Handle("POST /api/refresh", app.handlers.Refresh())
+	mux.Handle("POST /api/revoke", app.handlers.Revoke())
 
 	// webhooks
-	mux.Handle("POST /api/polka/webhooks", apihandler.UpgradeToChirpyRedHandler(app.config.DBQueries, app.config.PolkaKey))
+	mux.Handle("POST /api/pokja/webhooks", app.handlers.UpdateUser())
 
 	return mux
 }
@@ -76,4 +69,45 @@ func (app *application) MiddlewareMetricsInc(next http.Handler) http.Handler {
 			app.config.FileserverHits.Add(1)
 			next.ServeHTTP(w, r)
 		})
+}
+
+func (app *application) MetricsHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		resString := fmt.Sprintf(`
+		<html>
+			<body>
+				<h1>Welcome, Chirpy Admin</h1>
+				<p>Chirpy has been visited %d times!</p>
+			</body>
+		</html>`,
+			app.config.FileserverHits.Load())
+
+		w.Header().Set("Content-Type", "text/html")
+		w.WriteHeader(http.StatusOK)
+		_, _ = fmt.Fprint(w, resString)
+
+	}
+}
+
+func (app *application) resetHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if app.config.Platform != "dev" {
+			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+			w.WriteHeader(http.StatusForbidden)
+			log.Println("User accessed reset")
+			return
+		}
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		app.config.FileserverHits.Store(0)
+		// TODO: IMPLEMENT RESET USERS
+		if err := app.store.Users.Reset(r.Context()); err != nil {
+			util.RespondWithError(w, http.StatusInternalServerError, "there was a problem resetting users", err)
+		}
+		_, _ = fmt.Fprintf(w, "Hit counter reset!")
+	}
+}
+
+func (app *application) createFileServer() http.Handler {
+	return http.StripPrefix("/app", http.FileServer(http.Dir("./web/")))
 }
