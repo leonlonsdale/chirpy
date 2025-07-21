@@ -12,7 +12,7 @@ type contextKey string
 
 const UserIDKey contextKey = "userID"
 
-func (a *Auth) JWTProtect(secret string, next http.Handler) http.Handler {
+func (a *Auth) JWTProtect(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tokenString, err := a.GetBearerToken(r.Header)
 		if err != nil {
@@ -20,7 +20,7 @@ func (a *Auth) JWTProtect(secret string, next http.Handler) http.Handler {
 			return
 		}
 
-		userID, err := a.ValidateJWT(tokenString, secret)
+		userID, err := a.ValidateJWT(tokenString, a.cfg.Secret)
 		if err != nil {
 			util.RespondWithError(w, http.StatusUnauthorized, "invalid token", nil)
 

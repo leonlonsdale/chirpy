@@ -15,7 +15,7 @@ import (
 type AuthHandlers struct {
 	store *storage.Storage
 	cfg   *config.Config
-	auth  auth.Auth
+	auth  *auth.Auth
 }
 
 func (ah *AuthHandlers) Login() http.HandlerFunc {

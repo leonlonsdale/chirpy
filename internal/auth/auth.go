@@ -9,6 +9,7 @@ import (
 	"github.com/alexedwards/argon2id"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/leonlonsdale/chirpy/internal/config"
 )
 
 type AuthService interface {
@@ -16,10 +17,14 @@ type AuthService interface {
 	CheckPasswordHash(string, string) error
 }
 
-type Auth struct{}
+type Auth struct {
+	cfg *config.Config
+}
 
-func NewAuthService() Auth {
-	return Auth{}
+func NewAuthService(cfg *config.Config) *Auth {
+	return &Auth{
+		cfg: cfg,
+	}
 }
 
 var ErrInvalidCredentials = errors.New("invalid email or password")

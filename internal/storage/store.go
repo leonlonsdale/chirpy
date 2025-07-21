@@ -37,8 +37,8 @@ type Storage struct {
 	RefreshToken RefreshTokens
 }
 
-func NewStorage(db *sql.DB) Storage {
-	return Storage{
+func NewStorage(db *sql.DB) *Storage {
+	return &Storage{
 		Chirps:       &ChirpsStore{db},
 		Users:        &UsersStore{db},
 		RefreshToken: &RefreshTokenStore{db},

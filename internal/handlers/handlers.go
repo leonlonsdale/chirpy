@@ -37,7 +37,7 @@ type Handlers struct {
 	Webhooks
 }
 
-func NewHandlers(store *storage.Storage, cfg *config.Config, auth auth.Auth) *Handlers {
+func NewHandlers(store *storage.Storage, cfg *config.Config, auth *auth.Auth) *Handlers {
 	return &Handlers{
 		Users: &UserHandlers{
 			store: store,

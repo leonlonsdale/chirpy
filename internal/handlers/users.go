@@ -14,7 +14,7 @@ import (
 type UserHandlers struct {
 	cfg   *config.Config
 	store *storage.Storage
-	auth  auth.Auth
+	auth  *auth.Auth
 }
 
 func (h *UserHandlers) CreateUser() http.HandlerFunc {

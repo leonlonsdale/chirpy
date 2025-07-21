@@ -13,7 +13,7 @@ import (
 type WebhookHandlers struct {
 	cfg   *config.Config
 	store *storage.Storage
-	auth  auth.Auth
+	auth  *auth.Auth
 }
 
 const validEvent = "user.upgraded"

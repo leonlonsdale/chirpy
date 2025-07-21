@@ -26,7 +26,7 @@ func main() {
 
 	store := storage.NewStorage(db)
 
-	cfg := config.Config{
+	cfg := &config.Config{
 		Addr:           os.Getenv("ADDR"),
 		FileserverHits: &atomic.Int32{},
 		Platform:       os.Getenv("PLATFORM"),
@@ -34,8 +34,8 @@ func main() {
 		PolkaKey:       os.Getenv("POLKA_KEY"),
 	}
 
-	auth := auth.NewAuthService()
-	handlers := handlers.NewHandlers(&store, &cfg, auth)
+	auth := auth.NewAuthService(cfg)
+	handlers := handlers.NewHandlers(store, cfg, auth)
 
 	app := &application{
 		config:   cfg,
