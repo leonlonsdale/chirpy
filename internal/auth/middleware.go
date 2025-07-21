@@ -12,7 +12,7 @@ type contextKey string
 
 const UserIDKey contextKey = "userID"
 
-func MiddlewareCheckJWT(secret string, next http.Handler) http.Handler {
+func JWTProtect(secret string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tokenString, err := GetBearerToken(r.Header)
 		if err != nil {
