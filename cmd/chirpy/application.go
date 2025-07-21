@@ -27,22 +27,22 @@ func (app *application) mount() *http.ServeMux {
 	mux.Handle("GET /api/healthz", app.healthHandler())
 
 	// user
-	mux.Handle("POST /api/users", app.handlers.CreateUser())
-	mux.Handle("PUT /api/users", app.handlers.UpdateUser())
+	mux.Handle("POST /api/users", app.handlers.Users.CreateUser())
+	mux.Handle("PUT /api/users", app.handlers.Users.UpdateUser())
 
 	// chirp
-	mux.Handle("POST /api/chirps", app.auth.JWTProtect(app.handlers.CreateChirp()))
-	mux.Handle("GET /api/chirps", app.handlers.GetAllChirps())
-	mux.Handle("GET /api/chirps/{chirpID}", app.handlers.GetChirpById())
-	mux.Handle("DELETE /api/chirps/{chirpID}", app.auth.JWTProtect(app.handlers.DeleteChirpById()))
+	mux.Handle("POST /api/chirps", app.auth.JWTProtect(app.handlers.Chirps.CreateChirp()))
+	mux.Handle("GET /api/chirps", app.handlers.Chirps.GetAllChirps())
+	mux.Handle("GET /api/chirps/{chirpID}", app.handlers.Chirps.GetChirpById())
+	mux.Handle("DELETE /api/chirps/{chirpID}", app.auth.JWTProtect(app.handlers.Chirps.DeleteChirpById()))
 
 	// auth
-	mux.Handle("POST /api/login", app.handlers.Login())
-	mux.Handle("POST /api/refresh", app.handlers.Refresh())
-	mux.Handle("POST /api/revoke", app.handlers.Revoke())
+	mux.Handle("POST /api/login", app.handlers.Auth.Login())
+	mux.Handle("POST /api/refresh", app.handlers.Auth.Refresh())
+	mux.Handle("POST /api/revoke", app.handlers.Auth.Revoke())
 
 	// webhooks
-	mux.Handle("POST /api/pokja/webhooks", app.handlers.UpdateUser())
+	mux.Handle("POST /api/pokja/webhooks", app.handlers.Webhooks.UpgradeUser())
 
 	return mux
 }

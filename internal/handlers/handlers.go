@@ -31,10 +31,10 @@ type Webhooks interface {
 }
 
 type Handlers struct {
-	Users
-	Chirps
-	Auth
-	Webhooks
+	Users    Users
+	Chirps   Chirps
+	Auth     Auth
+	Webhooks Webhooks
 }
 
 func NewHandlers(store *storage.Storage, cfg *config.Config, auth *auth.Auth) *Handlers {
