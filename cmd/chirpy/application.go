@@ -17,6 +17,7 @@ type application struct {
 	config   config.Config
 	store    storage.Storage
 	handlers *handlers.Handlers
+	auth     auth.Auth
 }
 
 func (app *application) mount() *http.ServeMux {
@@ -32,10 +33,10 @@ func (app *application) mount() *http.ServeMux {
 	mux.Handle("PUT /api/users", app.handlers.UpdateUser())
 
 	// chirp
-	mux.Handle("POST /api/chirps", auth.JWTProtect(app.config.Secret, app.handlers.CreateChirp()))
+	mux.Handle("POST /api/chirps", app.auth.JWTProtect(app.config.Secret, app.handlers.CreateChirp()))
 	mux.Handle("GET /api/chirps", app.handlers.GetAllChirps())
 	mux.Handle("GET /api/chirps/{chirpID}", app.handlers.GetChirpById())
-	mux.Handle("DELETE /api/chirps/{chirpID}", auth.JWTProtect(app.config.Secret, app.handlers.DeleteChirpById()))
+	mux.Handle("DELETE /api/chirps/{chirpID}", app.auth.JWTProtect(app.config.Secret, app.handlers.DeleteChirpById()))
 
 	// auth
 	mux.Handle("POST /api/login", app.handlers.Login())

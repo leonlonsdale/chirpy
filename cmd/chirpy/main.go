@@ -6,6 +6,7 @@ import (
 	"sync/atomic"
 
 	"github.com/joho/godotenv"
+	"github.com/leonlonsdale/chirpy/internal/auth"
 	"github.com/leonlonsdale/chirpy/internal/config"
 	"github.com/leonlonsdale/chirpy/internal/database"
 	"github.com/leonlonsdale/chirpy/internal/handlers"
@@ -28,18 +29,19 @@ func main() {
 	cfg := config.Config{
 		Addr:           ":8080",
 		FileserverHits: &atomic.Int32{},
-		DBQueries:      *database.New(db),
 		Platform:       os.Getenv("PLATFORM"),
 		Secret:         os.Getenv("JWT_SECRET_KEY"),
 		PolkaKey:       os.Getenv("POLKA_KEY"),
 	}
 
-	handlers := handlers.NewHandlers(&store, &cfg)
+	authservice := auth.NewAuthService()
+	handlers := handlers.NewHandlers(&store, &cfg, authservice)
 
 	app := &application{
 		config:   cfg,
 		store:    store,
 		handlers: handlers,
+		auth:     authservice,
 	}
 
 	log.Fatal(app.run(app.mount()))
