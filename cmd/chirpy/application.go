@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -10,7 +9,6 @@ import (
 	"github.com/leonlonsdale/chirpy/internal/config"
 	"github.com/leonlonsdale/chirpy/internal/handlers"
 	"github.com/leonlonsdale/chirpy/internal/storage"
-	"github.com/leonlonsdale/chirpy/internal/util"
 )
 
 type application struct {
@@ -62,52 +60,4 @@ func (app *application) run(mux *http.ServeMux) error {
 	log.Printf("Server listening on %s", app.config.Addr)
 
 	return srv.ListenAndServe()
-}
-
-func (app *application) MiddlewareMetricsInc(next http.Handler) http.Handler {
-	return http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			app.config.FileserverHits.Add(1)
-			next.ServeHTTP(w, r)
-		})
-}
-
-func (app *application) MetricsHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		resString := fmt.Sprintf(`
-		<html>
-			<body>
-				<h1>Welcome, Chirpy Admin</h1>
-				<p>Chirpy has been visited %d times!</p>
-			</body>
-		</html>`,
-			app.config.FileserverHits.Load())
-
-		w.Header().Set("Content-Type", "text/html")
-		w.WriteHeader(http.StatusOK)
-		_, _ = fmt.Fprint(w, resString)
-
-	}
-}
-
-func (app *application) resetHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if app.config.Platform != "dev" {
-			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
-		log.Println("User accessed reset")
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		w.WriteHeader(http.StatusOK)
-		app.config.FileserverHits.Store(0)
-		if err := app.store.Users.Reset(r.Context()); err != nil {
-			util.RespondWithError(w, http.StatusInternalServerError, "there was a problem resetting users", err)
-		}
-		_, _ = fmt.Fprintf(w, "Hit and Users counter reset!")
-	}
-}
-
-func (app *application) createFileServer() http.Handler {
-	return http.StripPrefix("/app", http.FileServer(http.Dir("./web/")))
 }
