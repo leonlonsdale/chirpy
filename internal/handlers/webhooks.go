@@ -1,4 +1,4 @@
-package apihandler
+package handlers
 
 import (
 	"encoding/json"
@@ -6,12 +6,18 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/leonlonsdale/chirpy/internal/auth"
-	"github.com/leonlonsdale/chirpy/internal/database"
+	"github.com/leonlonsdale/chirpy/internal/config"
+	"github.com/leonlonsdale/chirpy/internal/storage"
 )
+
+type WebhookHandlers struct {
+	cfg   *config.Config
+	store *storage.Storage
+}
 
 const validEvent = "user.upgraded"
 
-func UpgradeToChirpyRedHandler(db database.Queries, polkakey string) http.HandlerFunc {
+func (wh *WebhookHandlers) UpgradeUser() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var params struct {
 			Event string `json:"event"`
@@ -21,7 +27,7 @@ func UpgradeToChirpyRedHandler(db database.Queries, polkakey string) http.Handle
 		}
 
 		apiKey, err := auth.GetAPIKey(r.Header)
-		if err != nil || apiKey != polkakey {
+		if err != nil || apiKey != wh.cfg.PolkaKey {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
@@ -44,7 +50,7 @@ func UpgradeToChirpyRedHandler(db database.Queries, polkakey string) http.Handle
 			return
 		}
 
-		affectedUsers, err := db.UpgradeToChirpyRed(r.Context(), userID)
+		affectedUsers, err := wh.store.Users.Upgrade(r.Context(), userID)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -56,5 +62,6 @@ func UpgradeToChirpyRedHandler(db database.Queries, polkakey string) http.Handle
 		}
 
 		w.WriteHeader(http.StatusNoContent)
+
 	}
 }
