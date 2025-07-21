@@ -24,14 +24,23 @@ type Users interface {
 	Reset(context.Context) error
 }
 
+type RefreshTokens interface {
+	Create(context.Context, types.CreateRefreshToken) error
+	GetUserFromToken(context.Context, string) (types.User, error)
+	Revoke(context.Context, string) error
+	Get(context.Context, string) (types.RefreshToken, error)
+}
+
 type Storage struct {
-	Users  Users
-	Chirps Chirps
+	Users        Users
+	Chirps       Chirps
+	RefreshToken RefreshTokens
 }
 
 func NewStorage(db *sql.DB) Storage {
 	return Storage{
-		Chirps: &ChirpsStore{db},
-		Users:  &UsersStore{db},
+		Chirps:       &ChirpsStore{db},
+		Users:        &UsersStore{db},
+		RefreshToken: &RefreshTokenStore{db},
 	}
 }
