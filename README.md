@@ -2,6 +2,8 @@
 
 Chirpy is a Twitter-like RESTful API server written in Go, designed for learning and rapid prototyping. It supports user registration, authentication, posting short messages ("chirps"), and basic admin operations. The backend uses PostgreSQL and features JWT authentication, refresh tokens, and a simple web frontend.
 
+It was originally built as part of the [Boot.dev](https://boot.dev) curriculum and used SQLC for database query generation. After completion, I decided to re-write it with a layered architecture and removal of reliance on sqlc.
+
 ## Features
 
 -   User registration and login with Argon2id password hashing
