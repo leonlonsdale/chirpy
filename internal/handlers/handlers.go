@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/leonlonsdale/chirpy/internal/auth"
 	"github.com/leonlonsdale/chirpy/internal/config"
 	"github.com/leonlonsdale/chirpy/internal/storage"
 )
@@ -36,11 +37,12 @@ type Handlers struct {
 	Webhooks
 }
 
-func NewHandlers(store *storage.Storage, cfg *config.Config) *Handlers {
+func NewHandlers(store *storage.Storage, cfg *config.Config, auth auth.Auth) *Handlers {
 	return &Handlers{
 		Users: &UserHandlers{
 			store: store,
 			cfg:   cfg,
+			auth:  auth,
 		},
 		Chirps: &ChirpHandlers{
 			store: store,
@@ -49,10 +51,12 @@ func NewHandlers(store *storage.Storage, cfg *config.Config) *Handlers {
 		Auth: &AuthHandlers{
 			store: store,
 			cfg:   cfg,
+			auth:  auth,
 		},
 		Webhooks: &WebhookHandlers{
 			store: store,
 			cfg:   cfg,
+			auth:  auth,
 		},
 	}
 }

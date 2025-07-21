@@ -15,6 +15,7 @@ import (
 type AuthHandlers struct {
 	store *storage.Storage
 	cfg   *config.Config
+	auth  auth.Auth
 }
 
 func (ah *AuthHandlers) Login() http.HandlerFunc {
@@ -42,18 +43,18 @@ func (ah *AuthHandlers) Login() http.HandlerFunc {
 			return
 		}
 
-		if err := auth.CheckPasswordHash(params.Password, user.HashedPassword); err != nil {
+		if err := ah.auth.CheckPasswordHash(params.Password, user.HashedPassword); err != nil {
 			util.RespondWithError(w, http.StatusUnauthorized, "incorrect email or password", err)
 			return
 		}
 
-		accessToken, err := auth.MakeJWT(user.ID, ah.cfg.Secret, time.Hour)
+		accessToken, err := ah.auth.MakeJWT(user.ID, ah.cfg.Secret, time.Hour)
 		if err != nil {
 			util.RespondWithError(w, http.StatusInternalServerError, "error creating jwt token", err)
 			return
 		}
 
-		refreshToken, err := auth.MakeRefreshToken()
+		refreshToken, err := ah.auth.MakeRefreshToken()
 		if err != nil {
 			util.RespondWithError(w, http.StatusInternalServerError, "error creating refresh token", err)
 			return
@@ -92,7 +93,7 @@ func (ah *AuthHandlers) Refresh() http.HandlerFunc {
 			Token string `json:"token"`
 		}
 
-		refreshToken, err := auth.GetBearerToken(r.Header)
+		refreshToken, err := ah.auth.GetBearerToken(r.Header)
 		if err != nil {
 			util.RespondWithError(w, http.StatusInternalServerError, "unable to retrieve bearer token", err)
 			return
@@ -104,7 +105,7 @@ func (ah *AuthHandlers) Refresh() http.HandlerFunc {
 			return
 		}
 
-		newAccessToken, err := auth.MakeJWT(user.ID, ah.cfg.Secret, time.Hour)
+		newAccessToken, err := ah.auth.MakeJWT(user.ID, ah.cfg.Secret, time.Hour)
 		if err != nil {
 			util.RespondWithError(w, http.StatusInternalServerError, "error creating new access token", err)
 			return
@@ -121,7 +122,7 @@ func (ah *AuthHandlers) Refresh() http.HandlerFunc {
 
 func (ah *AuthHandlers) Revoke() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		token, err := auth.GetBearerToken(r.Header)
+		token, err := ah.auth.GetBearerToken(r.Header)
 		if err != nil {
 			util.RespondWithError(w, http.StatusInternalServerError, "unable to retrieve bearer token", err)
 			return

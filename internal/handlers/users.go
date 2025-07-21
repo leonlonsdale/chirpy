@@ -14,6 +14,7 @@ import (
 type UserHandlers struct {
 	cfg   *config.Config
 	store *storage.Storage
+	auth  auth.Auth
 }
 
 func (h *UserHandlers) CreateUser() http.HandlerFunc {
@@ -37,7 +38,7 @@ func (h *UserHandlers) CreateUser() http.HandlerFunc {
 			return
 		}
 
-		hashedPassword, err := auth.HashPassword(params.Password)
+		hashedPassword, err := h.auth.HashPassword(params.Password)
 		if err != nil {
 			util.RespondWithError(w, http.StatusInternalServerError, "error hashing password", err)
 			return
@@ -75,13 +76,13 @@ func (h *UserHandlers) UpdateUser() http.HandlerFunc {
 			types.User
 		}
 
-		tokenStr, err := auth.GetBearerToken(r.Header)
+		tokenStr, err := h.auth.GetBearerToken(r.Header)
 		if err != nil {
 			util.RespondWithError(w, http.StatusUnauthorized, "missing or malformed token", err)
 			return
 		}
 
-		userID, err := auth.ValidateJWT(tokenStr, h.cfg.Secret)
+		userID, err := h.auth.ValidateJWT(tokenStr, h.cfg.Secret)
 		if err != nil {
 			util.RespondWithError(w, http.StatusUnauthorized, "invalid token", err)
 			return
@@ -98,7 +99,7 @@ func (h *UserHandlers) UpdateUser() http.HandlerFunc {
 			return
 		}
 
-		hashedPassword, err := auth.HashPassword(req.Password)
+		hashedPassword, err := h.auth.HashPassword(req.Password)
 		if err != nil {
 			util.RespondWithError(w, http.StatusInternalServerError, "error hashing password", err)
 			return

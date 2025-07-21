@@ -13,6 +13,7 @@ import (
 type WebhookHandlers struct {
 	cfg   *config.Config
 	store *storage.Storage
+	auth  auth.Auth
 }
 
 const validEvent = "user.upgraded"
@@ -26,7 +27,7 @@ func (wh *WebhookHandlers) UpgradeUser() http.HandlerFunc {
 			} `json:"data"`
 		}
 
-		apiKey, err := auth.GetAPIKey(r.Header)
+		apiKey, err := wh.auth.GetAPIKey(r.Header)
 		if err != nil || apiKey != wh.cfg.PolkaKey {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
