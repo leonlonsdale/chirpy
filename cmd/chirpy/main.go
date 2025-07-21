@@ -27,21 +27,21 @@ func main() {
 	store := storage.NewStorage(db)
 
 	cfg := config.Config{
-		Addr:           ":8080",
+		Addr:           os.Getenv("ADDR"),
 		FileserverHits: &atomic.Int32{},
 		Platform:       os.Getenv("PLATFORM"),
 		Secret:         os.Getenv("JWT_SECRET_KEY"),
 		PolkaKey:       os.Getenv("POLKA_KEY"),
 	}
 
-	authservice := auth.NewAuthService()
-	handlers := handlers.NewHandlers(&store, &cfg, authservice)
+	auth := auth.NewAuthService()
+	handlers := handlers.NewHandlers(&store, &cfg, auth)
 
 	app := &application{
 		config:   cfg,
 		store:    store,
 		handlers: handlers,
-		auth:     authservice,
+		auth:     auth,
 	}
 
 	log.Fatal(app.run(app.mount()))
